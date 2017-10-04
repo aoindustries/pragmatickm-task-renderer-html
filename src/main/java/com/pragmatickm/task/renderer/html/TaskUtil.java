@@ -140,13 +140,22 @@ final public class TaskUtil {
 	}
 
 	public static TaskLog.Entry getMostRecentEntry(TaskLog taskLog, String statuses) throws IOException {
-		List<String> split = StringUtility.splitStringCommaSpace(statuses);
+		String[] trimmed;
+		int size;
+		{
+			List<String> split = StringUtility.splitString(statuses, ','); // Split on comma only, because of "Nothing To Do" status having spaces
+			size = split.size();
+			trimmed = new String[size];
+			for(int i = 0; i < size; i++) {
+				trimmed[i] = split.get(i).trim();
+			}
+		}
 		List<TaskLog.Entry> entries = taskLog.getEntries();
-		for(int i=entries.size()-1; i>=0; i--) {
+		for(int i = entries.size() - 1; i >= 0; i--) {
 			TaskLog.Entry entry = entries.get(i);
 			String label = entry.getStatus().getLabel();
-			for(String status : split) {
-				if(label.equalsIgnoreCase(status)) {
+			for(int j = 0; j < size; j++) {
+				if(label.equalsIgnoreCase(trimmed[j])) {
 					return entry;
 				}
 			}
