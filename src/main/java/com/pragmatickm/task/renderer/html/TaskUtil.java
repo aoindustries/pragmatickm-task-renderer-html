@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -684,8 +684,6 @@ final public class TaskUtil {
 						try {
 							concurrentResults = SemanticCMS.getInstance(servletContext).getExecutors().getPerProcessor().callAll(concurrentTasks);
 						} catch(InterruptedException e) {
-							// Restore the interrupted status
-							Thread.currentThread().interrupt();
 							throw new ServletException(e);
 						} catch(ExecutionException e) {
 							Throwable cause = e.getCause();
