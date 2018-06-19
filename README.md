@@ -1,4 +1,4 @@
-# [<img src="ao-logo.png" alt="AO Logo" width="35" height="40">](https://aoindustries.com/) [PragmaticKM](https://pragmatickm.com/) / [Task](https://pragmatickm.com/task/) / [Renderer HTML](https://pragmatickm.com/task/renderer/html/)
+# [<img src="ao-logo.png" alt="AO Logo" width="35" height="40">](https://github.com/aoindustries) [PragmaticKM](https://github.com/aoindustries/pragmatickm) / [Task](https://github.com/aoindustries/pragmatickm-task) / [Renderer HTML](https://github.com/aoindustries/pragmatickm-task-renderer-html)
 <p>
 	<a href="https://aoindustries.com/life-cycle#project-alpha">
 		<img src="https://pragmatickm.com/ao-badges/project-alpha.svg" alt="project: alpha" />
@@ -24,7 +24,7 @@
 	</a>
 </p>
 
-[Tasks](https://pragmatickm.com/task/) rendered as HTML in a Servlet environment.
+[Tasks](https://github.com/aoindustries/pragmatickm-task) rendered as HTML in a Servlet environment.
 
 ## Project Links
 * [Project Home](https://pragmatickm.com/task/renderer/html/)
