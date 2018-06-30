@@ -463,6 +463,11 @@ final public class TaskUtil {
 			// Recurring task (possibly with null "on" date)
 			final Calendar firstIncomplete;
 			if(relative) {
+				// TODO: When "on" is set today because new task never completed, the status
+				//       should become the highest priority, and the assignments should be to
+				//       all assigned.  In other words: start most severe instead of least, because
+				//       tasks are remaining unfinished due to perpetual "Low" initial priority.
+
 				// Will use "on" or today if no completed tasklog entry
 				Calendar recurringFrom = (on != null) ? on : today;
 				// Schedule from most recent completed tasklog entry
