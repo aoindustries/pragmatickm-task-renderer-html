@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
-Copyright (C) 2017, 2018  AO Industries, Inc.
+Copyright (C) 2017, 2018, 2019  AO Industries, Inc.
     support@aoindustries.com
     7262 Bull Pen Cir
     Mobile, AL 36695
@@ -40,7 +40,7 @@ along with pragmatickm-task-renderer-html.  If not, see <http://www.gnu.org/lice
 		<description.html><![CDATA[<a target="_top" href="https://pragmatickm.com/task/">Tasks</a> rendered as HTML in a Servlet environment.]]></description.html>
 	</properties>
 
-	<name>PragmaticKM Task Renderer HTML</name>
+	<name>PragmaticKM 2 Task Renderer HTML</name>
 	<url>https://pragmatickm.com/task/renderer/html/</url>
 	<description>Tasks rendered as HTML in a Servlet environment.</description>
 	<inceptionYear>2013</inceptionYear>
