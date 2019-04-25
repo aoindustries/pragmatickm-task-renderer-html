@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,7 +27,6 @@ import com.aoindustries.net.Path;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
 import com.aoindustries.util.CalendarUtils;
-import com.aoindustries.util.ComparatorUtils;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.Tuple2;
 import com.aoindustries.util.UnmodifiableCalendar;
@@ -640,14 +639,14 @@ final public class TaskUtil {
 					)
 				);
 			} else {
-				Map<Task,StatusResult> results = new LinkedHashMap<Task,StatusResult>(size *4/3+1);
+				Map<Task,StatusResult> results = new LinkedHashMap<>(size *4/3+1);
 				List<Task> notCached = null; // Created when first needed
 				for(Task task : tasks) {
 					StatusResult cached = statusCache.get(task);
 					// Add entry even if null to set ordering, replacing this value later will not alter order
 					results.put(task, cached);
 					if(cached == null) {
-						if(notCached == null) notCached = new ArrayList<Task>(size - results.size());
+						if(notCached == null) notCached = new ArrayList<>(size - results.size());
 						notCached.add(task);
 					}
 				}
@@ -660,7 +659,7 @@ final public class TaskUtil {
 					) {
 						//System.err.println("notCachedSize = " + notCachedSize + ", doing concurrent getStatus");
 						// Concurrent implementation
-						List<Callable<StatusResult>> concurrentTasks = new ArrayList<Callable<StatusResult>>(notCachedSize);
+						List<Callable<StatusResult>> concurrentTasks = new ArrayList<>(notCachedSize);
 						{
 							final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 							final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
@@ -740,7 +739,7 @@ final public class TaskUtil {
 	) throws ServletException, IOException {
 		final String taskId = task.getId();
 		final Page taskPage = task.getPage();
-		final List<Task> doAfters = new ArrayList<Task>();
+		final List<Task> doAfters = new ArrayList<>();
 		final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 		CapturePage.traversePagesDepthFirst(
 			servletContext,
@@ -809,9 +808,9 @@ final public class TaskUtil {
 			);
 		} else {
 			// Fill with empty lists, this sets the iteration order, too
-			final Map<Task,List<Task>> results = new LinkedHashMap<Task,List<Task>>(size *4/3+1);
+			final Map<Task,List<Task>> results = new LinkedHashMap<>(size *4/3+1);
 			// Build map from ElementRef back to Task, for fast lookup during traversal
-			final Map<ElementRef,Task> tasksByElementRef = new HashMap<ElementRef,Task>(size *4/3+1);
+			final Map<ElementRef,Task> tasksByElementRef = new HashMap<>(size *4/3+1);
 			{
 				List<Task> emptyList = Collections.emptyList();
 				for(Task task : tasks) {
@@ -848,7 +847,7 @@ final public class TaskUtil {
 											} else {
 												if(doAftersSize == 1) {
 													Task first = doAfters.get(0);
-													doAfters = new ArrayList<Task>();
+													doAfters = new ArrayList<>();
 													doAfters.add(first);
 													results.put(doBefore, doAfters);
 												}
@@ -991,14 +990,14 @@ final public class TaskUtil {
 			null
 		);
 		// Index tasks by page,id
-		Map<ElementRef,Task> tasksByKey = new HashMap<ElementRef,Task>(allTasks.size()*4/3+1);
+		Map<ElementRef,Task> tasksByKey = new HashMap<>(allTasks.size()*4/3+1);
 		for(Task task : allTasks) {
 			if(tasksByKey.put(task.getElementRef(), task) != null) {
 				throw new AssertionError("Duplicate task (page, id)");
 			}
 		}
 		// Invert dependency DAG for fast lookups for priority inheritance
-		final Map<Task,List<Task>> doAftersByTask = new LinkedHashMap<Task,List<Task>>(allTasks.size()*4/3+1);
+		final Map<Task,List<Task>> doAftersByTask = new LinkedHashMap<>(allTasks.size()*4/3+1);
 		for(Task task : allTasks) {
 			for(ElementRef doBeforeRef : task.getDoBefores()) {
 				Task doBefore = tasksByKey.get(doBeforeRef);
@@ -1006,16 +1005,16 @@ final public class TaskUtil {
 				if(doBefore.getPage().getGeneratedIds().contains(doBefore.getId())) throw new TaskException("Not allowed to reference task by generated id, set an explicit id on the task: " + doBefore);
 				List<Task> doAfters = doAftersByTask.get(doBefore);
 				if(doAfters == null) {
-					doAfters = new ArrayList<Task>();
+					doAfters = new ArrayList<>();
 					doAftersByTask.put(doBefore, doAfters);
 				}
 				doAfters.add(task);
 			}
 		}
 		// Caches the effective priorities for tasks being prioritized or any other resolved in processing
-		final Map<Task,Priority> effectivePriorities = new HashMap<Task,Priority>();
+		final Map<Task,Priority> effectivePriorities = new HashMap<>();
 		// Build new list and sort
-		List<Task> sortedTasks = new ArrayList<Task>(tasks);
+		List<Task> sortedTasks = new ArrayList<>(tasks);
 		Collections.sort(
 			sortedTasks,
 			new Comparator<Task>() {
@@ -1025,7 +1024,7 @@ final public class TaskUtil {
 					StatusResult status2 = getStatus(servletContext, request, response, t2, cache, statusCache);
 					Calendar date1 = status1.getDate();
 					Calendar date2 = status2.getDate();
-					int diff = ComparatorUtils.compare(date2!=null, date1!=null);
+					int diff = Boolean.compare(date2!=null, date1!=null);
 					if(diff!=0) return diff;
 					// Then sort by date (if have date in both statuses)
 					if(date1!=null && date2!=null) {
@@ -1078,11 +1077,7 @@ final public class TaskUtil {
 						}
 						// Equal
 						return 0;
-					} catch(TaskException e) {
-						throw new WrappedException(e);
-					} catch(ServletException e) {
-						throw new WrappedException(e);
-					} catch(IOException e) {
+					} catch(TaskException | ServletException | IOException e) {
 						throw new WrappedException(e);
 					}
 				}
@@ -1128,7 +1123,7 @@ final public class TaskUtil {
 		Map<PageUserKey,List<Task>> cache = getPageUserCache(CacheFilter.getCache(request), ALL_TASKS_CACHE_KEY);
 		List<Task> results = cache.get(cacheKey);
 		if(results == null) {
-			final List<Task> allTasks = new ArrayList<Task>();
+			final List<Task> allTasks = new ArrayList<>();
 			final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			CapturePage.traversePagesDepthFirst(
 				servletContext,
@@ -1328,7 +1323,7 @@ final public class TaskUtil {
 		List<Task> results = getReadyTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
-			final List<Task> readyTasks = new ArrayList<Task>();
+			final List<Task> readyTasks = new ArrayList<>();
 			final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			CapturePage.traversePagesDepthFirst(
 				servletContext,
@@ -1425,7 +1420,7 @@ final public class TaskUtil {
 		List<Task> results = getBlockedTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
-			final List<Task> blockedTasks = new ArrayList<Task>();
+			final List<Task> blockedTasks = new ArrayList<>();
 			final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			CapturePage.traversePagesDepthFirst(
 				servletContext,
@@ -1523,7 +1518,7 @@ final public class TaskUtil {
 		List<Task> results = futureTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
-			final List<Task> futureTasks = new ArrayList<Task>();
+			final List<Task> futureTasks = new ArrayList<>();
 			final SemanticCMS semanticCMS = SemanticCMS.getInstance(servletContext);
 			CapturePage.traversePagesDepthFirst(
 				servletContext,
