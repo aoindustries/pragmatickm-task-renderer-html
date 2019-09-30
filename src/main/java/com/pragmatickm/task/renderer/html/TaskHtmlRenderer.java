@@ -30,6 +30,8 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlA
 import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
+import com.aoindustries.servlet.ServletUtil;
+import com.aoindustries.servlet.URIComponent;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
 import com.aoindustries.util.CalendarUtils;
 import com.aoindustries.util.WrappedException;
@@ -361,26 +363,30 @@ final public class TaskHtmlRenderer {
 				if(index != null) {
 					// view=all mode
 					out.write('#');
-					PageIndex.appendIdInPage(
-						index,
-						task.getId(),
-						new MediaWriter(textInXhtmlAttributeEncoder, out)
+					URIComponent.FRAGMENT.encode(
+						PageIndex.getRefId(
+							index,
+							task.getId()
+						),
+						response,
+						out,
+						textInXhtmlAttributeEncoder
 					);
 				} else if(taskPage.equals(currentPage)) {
 					// Task on this page, generate anchor-only link
 					encodeTextInXhtmlAttribute('#', out);
-					encodeTextInXhtmlAttribute(task.getId(), out);
+					URIComponent.FRAGMENT.encode(task.getId(), response, out, textInXhtmlAttributeEncoder);
 				} else {
 					// Task on other page, generate full link
 					BookRef taskBookRef = taskPageRef.getBookRef();
 					encodeTextInXhtmlAttribute(
 						response.encodeURL(
-							com.aoindustries.net.UrlUtils.encodeUrlPath(
+							ServletUtil.encodeURI(
 								request.getContextPath()
-									+ taskBookRef.getPrefix()
-									+ taskPageRef.getPath()
-									+ '#' + task.getId(),
-								response.getCharacterEncoding()
+								+ taskBookRef.getPrefix()
+								+ taskPageRef.getPath()
+								+ '#' + URIComponent.FRAGMENT.encode(task.getId(), response),
+								response
 							)
 						),
 						out
