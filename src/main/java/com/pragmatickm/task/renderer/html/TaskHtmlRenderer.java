@@ -355,40 +355,40 @@ final public class TaskHtmlRenderer {
 					encodeTextInXhtmlAttribute(linkCssClass, out);
 					out.write('"');
 				}
-				out.write(" href=\"");
 				PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 				final PageRef taskPageRef = taskPage.getPageRef();
 				Integer index = pageIndex==null ? null : pageIndex.getPageIndex(taskPageRef);
+				out.write(" href=\"");
+				StringBuilder href = new StringBuilder();
 				if(index != null) {
 					// view=all mode
-					out.write('#');
+					href.append('#');
 					URIEncoder.encodeURIComponent(
 						PageIndex.getRefId(
 							index,
 							task.getId()
 						),
-						textInXhtmlAttributeEncoder,
-						out
+						href
 					);
 				} else if(taskPage.equals(currentPage)) {
 					// Task on this page, generate anchor-only link
-					encodeTextInXhtmlAttribute('#', out);
-					URIEncoder.encodeURIComponent(task.getId(), textInXhtmlAttributeEncoder, out);
+					href.append('#');
+					URIEncoder.encodeURIComponent(task.getId(), href);
 				} else {
 					// Task on other page, generate full link
 					BookRef taskBookRef = taskPageRef.getBookRef();
-					encodeTextInXhtmlAttribute(
-						response.encodeURL(
-							URIEncoder.encodeURI(
-								request.getContextPath()
-								+ taskBookRef.getPrefix()
-								+ taskPageRef.getPath()
-								+ '#' + URIEncoder.encodeURIComponent(task.getId())
-							)
-						),
-						out
-					);
+					URIEncoder.encodeURI(request.getContextPath(), href);
+					URIEncoder.encodeURI(taskBookRef.getPrefix(), href);
+					URIEncoder.encodeURI(taskPageRef.getPath().toString(), href);
+					href.append('#');
+					URIEncoder.encodeURIComponent(task.getId(), href);
 				}
+				encodeTextInXhtmlAttribute(
+					response.encodeURL(
+						href.toString()
+					),
+					out
+				);
 				out.write("\">");
 				encodeTextInXhtml(task.getLabel(), out);
 				if(index != null) {
