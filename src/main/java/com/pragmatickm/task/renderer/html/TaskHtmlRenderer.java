@@ -367,13 +367,13 @@ final public class TaskHtmlRenderer {
 							index,
 							task.getId()
 						),
-						out,
-						textInXhtmlAttributeEncoder
+						textInXhtmlAttributeEncoder,
+						out
 					);
 				} else if(taskPage.equals(currentPage)) {
 					// Task on this page, generate anchor-only link
 					encodeTextInXhtmlAttribute('#', out);
-					URIEncoder.encodeURIComponent(task.getId(), out, textInXhtmlAttributeEncoder);
+					URIEncoder.encodeURIComponent(task.getId(), textInXhtmlAttributeEncoder, out);
 				} else {
 					// Task on other page, generate full link
 					BookRef taskBookRef = taskPageRef.getBookRef();
