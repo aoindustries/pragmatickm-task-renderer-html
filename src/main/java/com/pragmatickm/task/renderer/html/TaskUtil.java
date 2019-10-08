@@ -42,7 +42,7 @@ import com.semanticcms.core.controller.Book;
 import com.semanticcms.core.controller.Cache;
 import com.semanticcms.core.controller.CacheFilter;
 import com.semanticcms.core.controller.CapturePage;
-import com.semanticcms.core.controller.CountConcurrencyFilter;
+import com.semanticcms.core.controller.CountConcurrencyListener;
 import com.semanticcms.core.controller.PageRefResolver;
 import com.semanticcms.core.controller.SemanticCMS;
 import com.semanticcms.core.controller.subrequest.HttpServletSubRequest;
@@ -656,7 +656,7 @@ final public class TaskUtil {
 					assert notCachedSize > 0;
 					if(
 						notCachedSize > 1
-						&& CountConcurrencyFilter.useConcurrentSubrequests(request)
+						&& CountConcurrencyListener.useConcurrentSubrequests(request)
 					) {
 						//System.err.println("notCachedSize = " + notCachedSize + ", doing concurrent getStatus");
 						// Concurrent implementation
