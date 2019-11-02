@@ -203,7 +203,7 @@ final public class TaskHtmlRenderer {
 				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, out)
 			);
 			out.write("\" class=\"thinTable taskTable\"");
-			style = Coercion.nullIfEmpty(style);
+			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
 			if(style != null) {
 				out.write(" style=\"");
 				Coercion.write(style, textInXhtmlAttributeEncoder, out);
