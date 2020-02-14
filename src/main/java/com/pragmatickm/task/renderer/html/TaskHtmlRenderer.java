@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -27,9 +27,7 @@ import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
-import static com.aoindustries.encoding.TextInXhtmlEncoder.encodeTextInXhtml;
 import com.aoindustries.html.Html;
-import com.aoindustries.html.servlet.HtmlEE;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.net.URIEncoder;
@@ -58,7 +56,6 @@ import com.semanticcms.core.pages.local.CurrentPage;
 import com.semanticcms.core.renderer.html.HtmlRenderer;
 import com.semanticcms.core.renderer.html.PageIndex;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -79,46 +76,46 @@ final public class TaskHtmlRenderer {
 	private static final String TASKLOG_MID = "-tasklog-";
 	private static final String TASKLOG_EXTENSION = ".xml";
 
-	private static void writeRow(String header, String value, Writer out) throws IOException {
+	private static void writeRow(String header, String value, Html html) throws IOException {
 		if(value != null) {
-			out.write("<tr><th>");
-			encodeTextInXhtml(header, out);
-			out.write("</th><td colspan=\"3\">");
-			encodeTextInXhtml(value, out);
-			out.write("</td></tr>\n");
+			html.out.write("<tr><th>");
+			html.text(header);
+			html.out.write("</th><td colspan=\"3\">");
+			html.text(value);
+			html.out.write("</td></tr>\n");
 		}
 	}
 
-	private static void writeRow(String header, List<?> values, Writer out, Html html) throws IOException {
+	private static void writeRow(String header, List<?> values, Html html) throws IOException {
 		if(values != null) {
 			int size = values.size();
 			if(size > 0) {
-				out.write("<tr><th>");
-				encodeTextInXhtml(header, out);
-				out.write("</th><td colspan=\"3\">");
+				html.out.write("<tr><th>");
+				html.text(header);
+				html.out.write("</th><td colspan=\"3\">");
 				for(int i=0; i<size; i++) {
-					encodeTextInXhtml(values.get(i).toString(), out);
+					html.text(values.get(i));
 					if(i != (size - 1)) {
 						html.br__();
 					}
 				}
-				out.write("</td></tr>\n");
+				html.out.write("</td></tr>\n");
 			}
 		}
 	}
 
-	private static void writeRow(String header, Calendar date, Writer out) throws IOException {
-		if(date != null) writeRow(header, CalendarUtils.formatDate(date), out);
+	private static void writeRow(String header, Calendar date, Html html) throws IOException {
+		if(date != null) writeRow(header, CalendarUtils.formatDate(date), html);
 	}
 
-	private static void writeRow(String header, Recurring recurring, boolean relative, Writer out) throws IOException {
+	private static void writeRow(String header, Recurring recurring, boolean relative, Html html) throws IOException {
 		if(recurring != null) {
 			writeRow(
 				header,
 				relative
 					? (recurring.getRecurringDisplay() + " (Relative)")
 					: recurring.getRecurringDisplay(),
-				out
+				html
 			);
 		}
 	}
@@ -128,7 +125,7 @@ final public class TaskHtmlRenderer {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		Writer out,
+		Html html,
 		Task task,
 		Object style
 	) throws TaskException, IOException, ServletException {
@@ -152,7 +149,6 @@ final public class TaskHtmlRenderer {
 		}
 
 		if(captureLevel == CaptureLevel.BODY) {
-			Html html = HtmlEE.get(servletContext, request, out);
 			Cache cache = CacheFilter.getCache(request);
 			// Capture the doBefores
 			List<Task> doBefores;
@@ -195,65 +191,65 @@ final public class TaskHtmlRenderer {
 			}
 			// Write the task itself to this page
 			final PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-			out.write("<table id=\"");
+			html.out.write("<table id=\"");
 			PageIndex.appendIdInPage(
 				pageIndex,
 				currentPage,
 				task.getId(),
-				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, out)
+				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, html.out)
 			);
-			out.write("\" class=\"thinTable taskTable\"");
+			html.out.write("\" class=\"thinTable taskTable\"");
 			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
 			if(style != null) {
-				out.write(" style=\"");
-				Coercion.write(style, textInXhtmlAttributeEncoder, out);
-				out.write('"');
+				html.out.write(" style=\"");
+				Coercion.write(style, textInXhtmlAttributeEncoder, html.out);
+				html.out.write('"');
 			}
-			out.write(">\n"
+			html.out.write(">\n"
 					+ "<thead><tr><th class=\"taskTableHeader\" colspan=\"4\"><div>");
-			encodeTextInXhtml(task.getLabel(), out);
-			out.write("</div></th></tr></thead>\n"
+			html.text(task.getLabel());
+			html.out.write("</div></th></tr></thead>\n"
 					+ "<tbody>\n");
 			final long now = System.currentTimeMillis();
-			writeTasks(servletContext, request, response, out, cache, currentPage, now, doBefores, statuses, "Do Before:");
-			out.write("<tr><th>Status:</th><td class=\"");
+			writeTasks(servletContext, request, response, html, cache, currentPage, now, doBefores, statuses, "Do Before:");
+			html.out.write("<tr><th>Status:</th><td class=\"");
 			StatusResult status = statuses.get(task);
-			encodeTextInXhtmlAttribute(status.getCssClass().name(), out);
-			out.write("\" colspan=\"3\">");
-			encodeTextInXhtml(status.getDescription(), out);
-			out.write("</td></tr>\n");
+			encodeTextInXhtmlAttribute(status.getCssClass().name(), html.out);
+			html.out.write("\" colspan=\"3\">");
+			html.text(status.getDescription());
+			html.out.write("</td></tr>\n");
 			String comments = status.getComments();
 			if(comments != null && !comments.isEmpty()) {
-				out.write("<tr><th>Status Comment:</th><td colspan=\"3\">");
-				encodeTextInXhtml(comments, out);
-				out.write("</td></tr>\n");
+				html.out.write("<tr><th>Status Comment:</th><td colspan=\"3\">");
+				html.text(comments);
+				html.out.write("</td></tr>\n");
 			}
 			List<TaskPriority> taskPriorities = task.getPriorities();
 			for(int i=0, size=taskPriorities.size(); i<size; i++) {
 				TaskPriority taskPriority = taskPriorities.get(i);
-				out.write("<tr>");
+				html.out.write("<tr>");
 				if(i==0) {
-					out.write("<th");
+					html.out.write("<th");
 					if(size != 1) {
-						out.write(" rowspan=\"");
-						out.write(Integer.toString(size));
-						out.write('"');
+						html.out.write(" rowspan=\"");
+						encodeTextInXhtmlAttribute(Integer.toString(size), html.out);
+						html.out.write('"');
 					}
-					out.write(">Priority:</th>");
+					html.out.write(">Priority:</th>");
 				}
-				out.write("<td class=\"");
+				html.out.write("<td class=\"");
 				Priority priority = taskPriority.getPriority();
-				encodeTextInXhtmlAttribute(priority.getCssClass(), out);
-				out.write("\" colspan=\"3\">");
-				encodeTextInXhtml(taskPriority.toString(), out);
-				out.write("</td></tr>\n");
+				encodeTextInXhtmlAttribute(priority.getCssClass(), html.out);
+				html.out.write("\" colspan=\"3\">");
+				html.text(taskPriority);
+				html.out.write("</td></tr>\n");
 			}
-			writeRow(recurring==null ? "On:" : "Starting:", task.getOn(), out);
-			writeRow("Recurring:", recurring, relative, out);
-			writeRow("Assigned To:", task.getAssignedTo(), out, html);
-			writeRow("Pay:", task.getPay(), out);
-			writeRow("Cost:", task.getCost(), out);
-			writeTasks(servletContext, request, response, out, cache, currentPage, now, doAfters, statuses, "Do After:");
+			writeRow(recurring==null ? "On:" : "Starting:", task.getOn(), html);
+			writeRow("Recurring:", recurring, relative, html);
+			writeRow("Assigned To:", task.getAssignedTo(), html);
+			writeRow("Pay:", task.getPay(), html);
+			writeRow("Cost:", task.getCost(), html);
+			writeTasks(servletContext, request, response, html, cache, currentPage, now, doAfters, statuses, "Do After:");
 		}
 	}
 
@@ -266,7 +262,7 @@ final public class TaskHtmlRenderer {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		Writer out,
+		Html html,
 		Task task,
 		ValueExpression style
 	) throws TaskException, IOException, ServletException {
@@ -275,20 +271,20 @@ final public class TaskHtmlRenderer {
 			request,
 			response,
 			captureLevel,
-			out,
+			html,
 			task,
 			captureLevel == CaptureLevel.BODY ? resolveValue(style, Object.class, elContext) : null
 		);
 	}
 
-	public static void writeAfterBody(Task task, Writer out, ElementContext context) throws IOException {
+	public static void writeAfterBody(Task task, Html html, ElementContext context) throws IOException {
 		BufferResult body = task.getBody();
 		if(body.getLength() > 0) {
-			out.write("<tr><td colspan=\"4\">\n");
-			body.writeTo(new NodeBodyWriter(task, out, context));
-			out.write("\n</td></tr>\n");
+			html.out.write("<tr><td colspan=\"4\">\n");
+			body.writeTo(new NodeBodyWriter(task, html.out, context));
+			html.out.write("\n</td></tr>\n");
 		}
-		out.write("</tbody>\n"
+		html.out.write("</tbody>\n"
 				+ "</table>");
 	}
 
@@ -321,7 +317,7 @@ final public class TaskHtmlRenderer {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Writer out,
+		Html html,
 		Cache cache,
 		Page currentPage,
 		long now,
@@ -337,33 +333,33 @@ final public class TaskHtmlRenderer {
 				final Page taskPage = task.getPage();
 				StatusResult status = statuses.get(task);
 				Priority priority = getPriorityForStatus(now, task, status);
-				out.write("<tr>");
+				html.out.write("<tr>");
 				if(i==0) {
-					out.write("<th rowspan=\"");
-					encodeTextInXhtmlAttribute(Integer.toString(size), out);
-					out.write("\">");
-					encodeTextInXhtml(label, out);
-					out.write("</th>");
+					html.out.write("<th rowspan=\"");
+					encodeTextInXhtmlAttribute(Integer.toString(size), html.out);
+					html.out.write("\">");
+					html.text(label);
+					html.out.write("</th>");
 				}
-				out.write("<td class=\"");
-				encodeTextInXhtmlAttribute(status.getCssClass().name(), out);
-				out.write("\">");
-				encodeTextInXhtml(status.getDescription(), out);
-				out.write("</td><td class=\"");
-				encodeTextInXhtmlAttribute(priority.getCssClass(), out);
-				out.write("\">");
-				encodeTextInXhtml(priority.toString(), out);
-				out.write("</td><td><a");
+				html.out.write("<td class=\"");
+				encodeTextInXhtmlAttribute(status.getCssClass().name(), html.out);
+				html.out.write("\">");
+				html.text(status.getDescription());
+				html.out.write("</td><td class=\"");
+				encodeTextInXhtmlAttribute(priority.getCssClass(), html.out);
+				html.out.write("\">");
+				html.text(priority);
+				html.out.write("</td><td><a");
 				String linkCssClass = htmlRenderer.getLinkCssClass(task);
 				if(linkCssClass != null) {
-					out.write(" class=\"");
-					encodeTextInXhtmlAttribute(linkCssClass, out);
-					out.write('"');
+					html.out.write(" class=\"");
+					encodeTextInXhtmlAttribute(linkCssClass, html.out);
+					html.out.write('"');
 				}
 				PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 				final PageRef taskPageRef = taskPage.getPageRef();
 				Integer index = pageIndex==null ? null : pageIndex.getPageIndex(taskPageRef);
-				out.write(" href=\"");
+				html.out.write(" href=\"");
 				StringBuilder href = new StringBuilder();
 				if(index != null) {
 					// view=all mode
@@ -392,16 +388,16 @@ final public class TaskHtmlRenderer {
 					response.encodeURL(
 						href.toString()
 					),
-					out
+					html.out
 				);
-				out.write("\">");
-				encodeTextInXhtml(task.getLabel(), out);
+				html.out.write("\">");
+				html.text(task.getLabel());
 				if(index != null) {
-					out.write("<sup>[");
-					encodeTextInXhtml(Integer.toString(index+1), out);
-					out.write("]</sup>");
+					html.out.write("<sup>[");
+					html.text(index + 1);
+					html.out.write("]</sup>");
 				}
-				out.write("</a></td></tr>\n");
+				html.out.write("</a></td></tr>\n");
 			}
 		}
 	}
