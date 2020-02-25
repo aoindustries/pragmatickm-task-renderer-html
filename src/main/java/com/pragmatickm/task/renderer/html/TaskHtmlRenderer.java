@@ -198,7 +198,7 @@ final public class TaskHtmlRenderer {
 				task.getId(),
 				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, html.out)
 			);
-			html.out.write("\" class=\"thinTable taskTable\"");
+			html.out.write("\" class=\"ao-grid taskTable\"");
 			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
 			if(style != null) {
 				html.out.write(" style=\"");
