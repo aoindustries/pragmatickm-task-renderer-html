@@ -170,7 +170,12 @@ final public class TaskUtil {
 		return cache.getAttribute(
 			GET_STATUS_CACHE_KEY,
 			Map.class,
-			() -> cache.newMap()
+			new Cache.Callable<Map<Task,StatusResult>, RuntimeException>() {
+				@Override
+				public Map<Task, StatusResult> call() throws RuntimeException {
+					return cache.newMap();
+				}
+			}
 		);
 	}
 
