@@ -664,7 +664,7 @@ final public class TaskUtil {
 						{
 							final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 							final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
-							final TempFileContext tempFileContext = ServletTempFileContext.getTempFileContext(request);
+							final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
 							for(final Task task : notCached) {
 								concurrentTasks.add(
 									new Callable<StatusResult>() {
