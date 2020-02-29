@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2020  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -31,44 +31,54 @@ public class StatusResult {
 	/**
 	 * The CSS classes for different overall statuses.
 	 */
-	public enum StatusCssClass {
-		task_status_new,
-		task_status_new_waiting_do_after,
-		task_status_in_future,
-		task_status_due_today,
-		task_status_due_today_waiting_do_after,
-		task_status_late,
-		task_status_late_waiting_do_after,
-		task_status_progress,
-		task_status_progress_waiting_do_after,
-		task_status_completed,
-		task_status_missed;
+	public enum Style {
+		NEW                       ("pragmatickm-task-status-new"),
+		NEW_WAITING_DO_AFTER      ("pragmatickm-task-status-new-waiting-do-after"),
+		IN_FUTURE                 ("pragmatickm-task-status-in-future"),
+		DUE_TODAY                 ("pragmatickm-task-status-due-today"),
+		DUE_TODAY_WAITING_DO_AFTER("pragmatickm-task-status-due-today-waiting-do-after"),
+		LATE                      ("pragmatickm-task-status-late"),
+		LATE_WAITING_DO_AFTER     ("pragmatickm-task-status-late-waiting-do-after"),
+		PROGRESS                  ("pragmatickm-task-status-progress"),
+		PROGRESS_WAITING_DO_AFTER ("pragmatickm-task-status-progress-waiting-do-after"),
+		COMPLETED                 ("pragmatickm-task-status-completed"),
+		MISSED                    ("pragmatickm-task-status-missed");
+
+		private final String cssClass;
+
+		private Style(String cssClass) {
+			this.cssClass = cssClass;
+		}
+
+		public String getCssClass() {
+			return cssClass;
+		}
 
 		/**
 		 * Gets the CSS class for a given TaskLog status.
 		 */
-		public static StatusCssClass getStatusCssClass(TaskLog.Status taskLogStatus) {
+		public static Style getStyle(TaskLog.Status taskLogStatus) {
 			switch(taskLogStatus) {
-				case PROGRESS : return task_status_progress;
-				case COMPLETED : return task_status_completed;
-				case NOTHING_TO_DO : return task_status_completed;
-				case MISSED : return task_status_missed;
-				default : throw new AssertionError("Unexpected value for taskLogStatus: " + taskLogStatus);
+				case PROGRESS      : return PROGRESS;
+				case COMPLETED     : return COMPLETED;
+				case NOTHING_TO_DO : return COMPLETED;
+				case MISSED        : return MISSED;
+				default            : throw new AssertionError("Unexpected value for taskLogStatus: " + taskLogStatus);
 			}
 		}
 
-		public static StatusCssClass getStatusDoBeforeCssClass(TaskLog.Status taskLogStatus) {
+		public static Style getStyleDoBefore(TaskLog.Status taskLogStatus) {
 			switch(taskLogStatus) {
-				case PROGRESS : return task_status_progress_waiting_do_after;
-				case COMPLETED : return task_status_completed;
-				case NOTHING_TO_DO : return task_status_completed;
-				case MISSED : return task_status_missed;
-				default : throw new AssertionError("Unexpected value for taskLogStatus: " + taskLogStatus);
+				case PROGRESS      : return PROGRESS_WAITING_DO_AFTER;
+				case COMPLETED     : return COMPLETED;
+				case NOTHING_TO_DO : return COMPLETED;
+				case MISSED        : return MISSED;
+				default            : throw new AssertionError("Unexpected value for taskLogStatus: " + taskLogStatus);
 			}
 		}
 	}
 
-	private final StatusCssClass cssClass;
+	private final Style style;
 	private final String description;
 	private final String comments;
 	private final boolean completedSchedule;
@@ -77,7 +87,7 @@ public class StatusResult {
 	private final UnmodifiableCalendar date;
 
 	StatusResult(
-		StatusCssClass cssClass,
+		Style style,
 		String description,
 		String comments,
 		boolean completedSchedule,
@@ -87,7 +97,7 @@ public class StatusResult {
 	) {
 		if(completedSchedule && readySchedule) throw new AssertionError("A task may not be both completed and ready");
 		if(readySchedule && futureSchedule) throw new AssertionError("A task may not be both ready and future");
-		this.cssClass = cssClass;
+		this.style = style;
 		this.description = description;
 		this.comments = comments;
 		this.completedSchedule = completedSchedule;
@@ -95,6 +105,7 @@ public class StatusResult {
 		this.futureSchedule = futureSchedule;
 		this.date = UnmodifiableCalendar.wrap(date);
 	}
+
 	StatusResult(
 		TaskLog.Status taskStatus,
 		String comments,
@@ -103,10 +114,10 @@ public class StatusResult {
 		Calendar date
 	) {
 		if(allDoBeforesCompleted) {
-			this.cssClass = StatusCssClass.getStatusCssClass(taskStatus);
+			this.style = Style.getStyle(taskStatus);
 			this.description = taskStatus.getLabel();
 		} else {
-			this.cssClass = StatusCssClass.getStatusDoBeforeCssClass(taskStatus);
+			this.style = Style.getStyleDoBefore(taskStatus);
 			this.description = taskStatus.getLabelDoBefore();
 		}
 		this.comments = comments;
@@ -116,8 +127,8 @@ public class StatusResult {
 		this.date = UnmodifiableCalendar.wrap(date);
 	}
 
-	public StatusCssClass getCssClass() {
-		return cssClass;
+	public Style getStyle() {
+		return style;
 	}
 
 	public String getDescription() {

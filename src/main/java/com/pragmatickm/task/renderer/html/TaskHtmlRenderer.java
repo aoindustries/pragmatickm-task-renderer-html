@@ -71,8 +71,8 @@ import javax.servlet.http.HttpServletResponse;
 
 final public class TaskHtmlRenderer {
 
-	private static final String REMOVE_JSP_EXTENSION = ".jsp";
-	private static final String REMOVE_JSPX_EXTENSION = ".jspx";
+	// TODO: Unused: private static final String REMOVE_JSP_EXTENSION = ".jsp";
+	// TODO: Unused: private static final String REMOVE_JSPX_EXTENSION = ".jspx";
 	private static final String TASKLOG_MID = "-tasklog-";
 	private static final String TASKLOG_EXTENSION = ".xml";
 
@@ -198,7 +198,7 @@ final public class TaskHtmlRenderer {
 				task.getId(),
 				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, html.out)
 			);
-			html.out.write("\" class=\"ao-grid taskTable\"");
+			html.out.write("\" class=\"ao-grid pragmatickm-task\"");
 			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
 			if(style != null) {
 				html.out.write(" style=\"");
@@ -206,7 +206,7 @@ final public class TaskHtmlRenderer {
 				html.out.write('"');
 			}
 			html.out.write(">\n"
-					+ "<thead><tr><th class=\"taskTableHeader\" colspan=\"4\"><div>");
+					+ "<thead><tr><th colspan=\"4\"><div>");
 			html.text(task.getLabel());
 			html.out.write("</div></th></tr></thead>\n"
 					+ "<tbody>\n");
@@ -214,7 +214,7 @@ final public class TaskHtmlRenderer {
 			writeTasks(servletContext, request, response, html, cache, currentPage, now, doBefores, statuses, "Do Before:");
 			html.out.write("<tr><th>Status:</th><td class=\"");
 			StatusResult status = statuses.get(task);
-			encodeTextInXhtmlAttribute(status.getCssClass().name(), html.out);
+			encodeTextInXhtmlAttribute(status.getStyle().getCssClass(), html.out);
 			html.out.write("\" colspan=\"3\">");
 			html.text(status.getDescription());
 			html.out.write("</td></tr>\n");
@@ -342,7 +342,7 @@ final public class TaskHtmlRenderer {
 					html.out.write("</th>");
 				}
 				html.out.write("<td class=\"");
-				encodeTextInXhtmlAttribute(status.getCssClass().name(), html.out);
+				encodeTextInXhtmlAttribute(status.getStyle().getCssClass(), html.out);
 				html.out.write("\">");
 				html.text(status.getDescription());
 				html.out.write("</td><td class=\"");

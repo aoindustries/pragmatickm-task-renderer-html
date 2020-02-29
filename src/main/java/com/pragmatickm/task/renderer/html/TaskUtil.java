@@ -318,7 +318,7 @@ final public class TaskUtil {
 					long entryOnMillis = entry.getOn().getTimeInMillis();
 					boolean future = entryOnMillis >= todayMillis;
 					return new StatusResult(
-						StatusResult.StatusCssClass.getStatusCssClass(TaskLog.Status.PROGRESS),
+						StatusResult.Style.getStyle(TaskLog.Status.PROGRESS),
 						entryOnMillis == todayMillis
 							? "Progress Today"
 							: ("Progress on " + CalendarUtils.formatDate(entry.getOn())),
@@ -340,7 +340,7 @@ final public class TaskUtil {
 			}
 			if(allDoBeforesCompleted) {
 				return new StatusResult(
-					StatusResult.StatusCssClass.task_status_new,
+					StatusResult.Style.NEW,
 					"New",
 					null,
 					false,
@@ -350,7 +350,7 @@ final public class TaskUtil {
 				);
 			} else {
 				return new StatusResult(
-					StatusResult.StatusCssClass.task_status_new_waiting_do_after,
+					StatusResult.Style.NEW_WAITING_DO_AFTER,
 					"New waiting for \"Do Before\"",
 					null,
 					false,
@@ -378,7 +378,7 @@ final public class TaskUtil {
 					if(entryOnMillis >= todayMillis) {
 						// If marked with "Progress" on or after today, will be moved to the future list
 						return new StatusResult(
-							StatusResult.StatusCssClass.getStatusCssClass(TaskLog.Status.PROGRESS),
+							StatusResult.Style.getStyle(TaskLog.Status.PROGRESS),
 							entryOnMillis == todayMillis
 								? "Progress Today"
 								: ("Progress on " + CalendarUtils.formatDate(entry.getOn())),
@@ -395,7 +395,7 @@ final public class TaskUtil {
 			if(on.before(today)) {
 				if(allDoBeforesCompleted) {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_late,
+						StatusResult.Style.LATE,
 						"Late " + CalendarUtils.formatDate(on),
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -405,7 +405,7 @@ final public class TaskUtil {
 					);
 				} else {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_late_waiting_do_after,
+						StatusResult.Style.LATE_WAITING_DO_AFTER,
 						"Late " + CalendarUtils.formatDate(on) + " waiting for \"Do Before\"",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -419,7 +419,7 @@ final public class TaskUtil {
 			if(on.getTimeInMillis() == todayMillis) {
 				if(allDoBeforesCompleted) {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_due_today,
+						StatusResult.Style.DUE_TODAY,
 						"Due Today",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -429,7 +429,7 @@ final public class TaskUtil {
 					);
 				} else {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_due_today_waiting_do_after,
+						StatusResult.Style.DUE_TODAY_WAITING_DO_AFTER,
 						"Due Today waiting for \"Do Before\"",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -451,7 +451,7 @@ final public class TaskUtil {
 				);
 			}
 			return new StatusResult(
-				StatusResult.StatusCssClass.task_status_in_future,
+				StatusResult.Style.IN_FUTURE,
 				"Waiting until " + CalendarUtils.formatDate(on),
 				null,
 				false, // Was true, but if never done and waiting for future, it isn't completed
@@ -508,7 +508,7 @@ final public class TaskUtil {
 						if(entryOnMillis >= todayMillis) {
 							// If marked with "Progress" on or after today, will be moved to the future list
 							return new StatusResult(
-								StatusResult.StatusCssClass.getStatusCssClass(TaskLog.Status.PROGRESS),
+								StatusResult.Style.getStyle(TaskLog.Status.PROGRESS),
 								entryOnMillis == todayMillis
 									? "Progress Today"
 									: ("Progress on " + CalendarUtils.formatDate(entry.getOn())),
@@ -523,7 +523,7 @@ final public class TaskUtil {
 				}
 				if(allDoBeforesCompleted) {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_late,
+						StatusResult.Style.LATE,
 						"Late " + CalendarUtils.formatDate(firstIncomplete),
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -533,7 +533,7 @@ final public class TaskUtil {
 					);
 				} else {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_late_waiting_do_after,
+						StatusResult.Style.LATE_WAITING_DO_AFTER,
 						"Late " + CalendarUtils.formatDate(firstIncomplete) + " waiting for \"Do Before\"",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -552,7 +552,7 @@ final public class TaskUtil {
 						if(entryOnMillis >= todayMillis) {
 							// If marked with "Progress" on or after today, will be moved to the future list
 							return new StatusResult(
-								StatusResult.StatusCssClass.getStatusCssClass(TaskLog.Status.PROGRESS),
+								StatusResult.Style.getStyle(TaskLog.Status.PROGRESS),
 								entryOnMillis == todayMillis
 									? "Progress Today"
 									: ("Progress on " + CalendarUtils.formatDate(entry.getOn())),
@@ -567,7 +567,7 @@ final public class TaskUtil {
 				}
 				if(allDoBeforesCompleted) {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_due_today,
+						StatusResult.Style.DUE_TODAY,
 						"Due Today",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -577,7 +577,7 @@ final public class TaskUtil {
 					);
 				} else {
 					return new StatusResult(
-						StatusResult.StatusCssClass.task_status_due_today_waiting_do_after,
+						StatusResult.Style.DUE_TODAY_WAITING_DO_AFTER,
 						"Due Today waiting for \"Do Before\"",
 						entry!=null ? entry.getComments() : null,
 						false,
@@ -588,7 +588,7 @@ final public class TaskUtil {
 				}
 			}
 			return new StatusResult(
-				StatusResult.StatusCssClass.task_status_in_future,
+				StatusResult.Style.IN_FUTURE,
 				"Waiting until " + CalendarUtils.formatDate(firstIncomplete),
 				null,
 				true,
