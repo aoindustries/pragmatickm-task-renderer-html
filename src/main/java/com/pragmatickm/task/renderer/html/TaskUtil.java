@@ -29,7 +29,7 @@ import com.aoindustries.servlet.subrequest.HttpServletSubResponse;
 import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletRequest;
 import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletResponse;
 import com.aoindustries.tempfiles.TempFileContext;
-import com.aoindustries.tempfiles.servlet.ServletTempFileContext;
+import com.aoindustries.tempfiles.servlet.TempFileContextEE;
 import com.aoindustries.util.CalendarUtils;
 import com.aoindustries.util.StringUtility;
 import com.aoindustries.util.Tuple2;
@@ -664,7 +664,7 @@ final public class TaskUtil {
 						{
 							final HttpServletRequest threadSafeReq = new UnmodifiableCopyHttpServletRequest(request);
 							final HttpServletResponse threadSafeResp = new UnmodifiableCopyHttpServletResponse(response);
-							final TempFileContext tempFileContext = ServletTempFileContext.getInstance(request);
+							final TempFileContext tempFileContext = TempFileContextEE.get(request);
 							for(final Task task : notCached) {
 								concurrentTasks.add(
 									new Callable<StatusResult>() {
