@@ -31,7 +31,7 @@ import com.aoindustries.servlet.subrequest.UnmodifiableCopyHttpServletResponse;
 import com.aoindustries.tempfiles.TempFileContext;
 import com.aoindustries.tempfiles.servlet.TempFileContextEE;
 import com.aoindustries.util.CalendarUtils;
-import com.aoindustries.util.StringUtility;
+import com.aoindustries.lang.Strings;
 import com.aoindustries.util.Tuple2;
 import com.aoindustries.util.UnmodifiableCalendar;
 import com.aoindustries.util.WrappedException;
@@ -143,7 +143,7 @@ final public class TaskUtil {
 		String[] trimmed;
 		int size;
 		{
-			List<String> split = StringUtility.splitString(statuses, ','); // Split on comma only, because of "Nothing To Do" status having spaces
+			List<String> split = Strings.splitString(statuses, ','); // Split on comma only, because of "Nothing To Do" status having spaces
 			size = split.size();
 			trimmed = new String[size];
 			for(int i = 0; i < size; i++) {
