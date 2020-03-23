@@ -180,13 +180,14 @@ final public class TaskUtil {
 	 * </p>
 	 * <p>
 	 * For non-scheduled tasks (with no "on" date and no "recurring"), the status is:
+	 * </p>
 	 * <ol>
 	 *   <li>The status of the most recent log entry with no "scheduledOn" value</li>
 	 *   <li>"New"</li>
 	 * </ol>
-	 * </p>
 	 * <p>
 	 * For a scheduled, non-recurring task, the status is:
+	 * </p>
 	 * <ol>
 	 *   <li>If the status of the most recent log entry with a "scheduledOn" value equaling the task "on" date is of a "completedSchedule" type - use the status.</li>
 	 *   <li>If in the past, "Late YYYY-MM-DD"</li>
@@ -194,7 +195,6 @@ final public class TaskUtil {
 	 *   <li>If there is a status of the most recent log entry with a "scheduledOn" value equaling the task "on" date - use the status.</li>
 	 *   <li>Is in the future, "Waiting until YYYY-MM-DD"</li>
 	 * </ol>
-	 * </p>
 	 * <p>
 	 * For a recurring task, the status is:
 	 * </p>
