@@ -142,7 +142,7 @@ final public class TaskUtil {
 		String[] trimmed;
 		int size;
 		{
-			List<String> split = Strings.splitString(statuses, ','); // Split on comma only, because of "Nothing To Do" status having spaces
+			List<String> split = Strings.split(statuses, ','); // Split on comma only, because of "Nothing To Do" status having spaces
 			size = split.size();
 			trimmed = new String[size];
 			for(int i = 0; i < size; i++) {
