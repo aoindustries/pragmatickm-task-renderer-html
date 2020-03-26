@@ -196,7 +196,7 @@ final public class TaskHtmlRenderer {
 				pageIndex,
 				currentPage,
 				task.getId(),
-				new MediaWriter(TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, html.out)
+				new MediaWriter(html.encodingContext, TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, html.out)
 			);
 			html.out.write("\" class=\"ao-grid pragmatickm-task\"");
 			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
