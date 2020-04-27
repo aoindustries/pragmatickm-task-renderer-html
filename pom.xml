@@ -81,14 +81,14 @@ along with pragmatickm-task-renderer-html.  If not, see <http://www.gnu.org/lice
 								<link>https://aoindustries.com/ao-taglib/apidocs/</link>
 								<link>https://aoindustries.com/ao-tempfiles/apidocs/</link>
 								<link>https://aoindustries.com/ao-tempfiles/servlet/apidocs/</link>
-								<link>https://aoindustries.com/aocode-public/servlet/apidocs/</link>
+								<link>https://aoindustries.com/aocode-public/apidocs/</link>
 								<link>https://pragmatickm.com/task/model/apidocs/</link>
-								<link>https://semanticcms.com/core/controller/apidocs/</link>
+								<!-- TODO: Once published: <link>https://semanticcms.com/core/controller/apidocs/</link> -->
 								<link>https://semanticcms.com/core/model/apidocs/</link>
-								<link>https://semanticcms.com/core/pages/apidocs/</link>
-								<link>https://semanticcms.com/core/pages/local/apidocs/</link>
-								<link>https://semanticcms.com/core/renderer/html/apidocs/</link>
-								<link>https://semanticcms.com/core/resources/apidocs/</link>
+								<!-- TODO: Once published: <link>https://semanticcms.com/core/pages/apidocs/</link> -->
+								<!-- TODO: Once published: <link>https://semanticcms.com/core/pages/local/apidocs/</link> -->
+								<!-- TODO: Once published: <link>https://semanticcms.com/core/renderer/html/apidocs/</link> -->
+								<!-- TODO: Once published: <link>https://semanticcms.com/core/resources/apidocs/</link> -->
 							</links>
 						</configuration>
 					</plugin>
