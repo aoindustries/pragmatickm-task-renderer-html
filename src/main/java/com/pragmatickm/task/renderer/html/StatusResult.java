@@ -151,6 +151,7 @@ public class StatusResult {
 		return futureSchedule;
 	}
 
+	@SuppressWarnings("ReturnOfDateField") // UnmodifiableCalendar
 	public UnmodifiableCalendar getDate() {
 		return date;
 	}
