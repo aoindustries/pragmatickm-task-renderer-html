@@ -35,6 +35,7 @@ import com.aoindustries.tempfiles.servlet.TempFileContextEE;
 import com.aoindustries.util.CalendarUtils;
 import com.aoindustries.util.Tuple2;
 import com.aoindustries.util.UnmodifiableCalendar;
+import com.aoindustries.util.concurrent.ExecutionExceptions;
 import com.aoindustries.util.schedule.Recurring;
 import com.pragmatickm.task.model.Priority;
 import com.pragmatickm.task.model.Task;
@@ -680,12 +681,18 @@ final public class TaskUtil {
 						} catch(InterruptedException e) {
 							throw new ServletException(e);
 						} catch(ExecutionException e) {
-							Throwable cause = e.getCause();
-							if(cause instanceof RuntimeException) throw (RuntimeException)cause;
-							if(cause instanceof TaskException) throw (TaskException)cause;
-							if(cause instanceof ServletException) throw (ServletException)cause;
-							if(cause instanceof IOException) throw (IOException)cause;
-							throw new ServletException(cause);
+							// Maintain expected exception types while not losing stack trace
+							// TODO: Once pragmatickm-task-model is SNAPSHOT again: ExecutionExceptions.wrapAndThrow(e, TaskException.class, TaskException::new);
+							// TODO: Compatibility implementation using initCause:
+							ExecutionExceptions.wrapAndThrow(e, TaskException.class,
+								(message, ee) -> {
+									TaskException te = new TaskException(message);
+									te.initCause(ee);
+									return te;
+								}
+							);
+							ExecutionExceptions.wrapAndThrow(e, IOException.class, IOException::new);
+							throw new ServletException(e);
 						}
 						for(int i=0; i<notCachedSize; i++) {
 							results.put(
