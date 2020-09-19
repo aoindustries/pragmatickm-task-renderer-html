@@ -22,6 +22,7 @@
  */
 package com.pragmatickm.task.renderer.html;
 
+import com.aoindustries.collections.AoCollections;
 import com.aoindustries.exception.WrappedException;
 import com.aoindustries.lang.Strings;
 import com.aoindustries.net.DomainName;
@@ -68,7 +69,6 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -635,7 +635,7 @@ final public class TaskUtil {
 					)
 				);
 			} else {
-				Map<Task,StatusResult> results = new LinkedHashMap<>(size *4/3+1);
+				Map<Task,StatusResult> results = AoCollections.newLinkedHashMap(size);
 				List<Task> notCached = null; // Created when first needed
 				for(Task task : tasks) {
 					StatusResult cached = statusCache.get(task);
@@ -792,9 +792,9 @@ final public class TaskUtil {
 			);
 		} else {
 			// Fill with empty lists, this sets the iteration order, too
-			final Map<Task,List<Task>> results = new LinkedHashMap<>(size *4/3+1);
+			final Map<Task,List<Task>> results = AoCollections.newLinkedHashMap(size);
 			// Build map from ElementRef back to Task, for fast lookup during traversal
-			final Map<ElementRef,Task> tasksByElementRef = new HashMap<>(size *4/3+1);
+			final Map<ElementRef,Task> tasksByElementRef = AoCollections.newHashMap(size);
 			{
 				List<Task> emptyList = Collections.emptyList();
 				for(Task task : tasks) {
@@ -961,14 +961,14 @@ final public class TaskUtil {
 			null
 		);
 		// Index tasks by page,id
-		Map<ElementRef,Task> tasksByKey = new HashMap<>(allTasks.size()*4/3+1);
+		Map<ElementRef,Task> tasksByKey = AoCollections.newHashMap(allTasks.size());
 		for(Task task : allTasks) {
 			if(tasksByKey.put(task.getElementRef(), task) != null) {
 				throw new AssertionError("Duplicate task (page, id)");
 			}
 		}
 		// Invert dependency DAG for fast lookups for priority inheritance
-		final Map<Task,List<Task>> doAftersByTask = new LinkedHashMap<>(allTasks.size()*4/3+1);
+		final Map<Task,List<Task>> doAftersByTask = AoCollections.newLinkedHashMap(allTasks.size());
 		for(Task task : allTasks) {
 			for(ElementRef doBeforeRef : task.getDoBefores()) {
 				Task doBefore = tasksByKey.get(doBeforeRef);
