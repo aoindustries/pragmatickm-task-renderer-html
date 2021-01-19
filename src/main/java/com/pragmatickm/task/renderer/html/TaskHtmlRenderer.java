@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -222,6 +222,7 @@ final public class TaskHtmlRenderer {
 				html.text(comments);
 				html.out.write("</td></tr>\n");
 			}
+			// TODO: When there are no current status comments, show any tasklog comments from the last entry
 			List<TaskPriority> taskPriorities = task.getPriorities();
 			for(int i=0, size=taskPriorities.size(); i<size; i++) {
 				TaskPriority taskPriority = taskPriorities.get(i);
