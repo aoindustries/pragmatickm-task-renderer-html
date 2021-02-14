@@ -23,7 +23,6 @@
 package com.pragmatickm.task.renderer.html;
 
 import com.aoindustries.collections.AoCollections;
-import com.aoindustries.encoding.Coercion;
 import com.aoindustries.encoding.MediaWriter;
 import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
 import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
@@ -31,6 +30,7 @@ import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlA
 import com.aoindustries.exception.WrappedException;
 import com.aoindustries.html.Html;
 import com.aoindustries.io.buffer.BufferResult;
+import com.aoindustries.lang.Coercion;
 import com.aoindustries.net.Path;
 import com.aoindustries.net.URIEncoder;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
