@@ -23,14 +23,12 @@
 package com.pragmatickm.task.renderer.html;
 
 import com.aoindustries.collections.AoCollections;
-import com.aoindustries.encoding.MediaWriter;
-import com.aoindustries.encoding.TextInXhtmlAttributeEncoder;
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.encodeTextInXhtmlAttribute;
-import static com.aoindustries.encoding.TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder;
 import com.aoindustries.exception.WrappedException;
-import com.aoindustries.html.Document;
+import com.aoindustries.html.PalpableContent;
+import com.aoindustries.html.TABLE_c;
+import com.aoindustries.html.TBODY_c;
+import com.aoindustries.html.TR_factory;
 import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.lang.Coercion;
 import com.aoindustries.net.Path;
 import com.aoindustries.net.URIEncoder;
 import static com.aoindustries.taglib.AttributeUtils.resolveValue;
@@ -76,56 +74,59 @@ final public class TaskHtmlRenderer {
 	private static final String TASKLOG_MID = "-tasklog-";
 	private static final String TASKLOG_EXTENSION = ".xml";
 
-	private static void writeRow(String header, String value, Document document) throws IOException {
+	private static void writeRow(String header, String value, TR_factory<?> factory) throws IOException {
 		if(value != null) {
-			document.out.write("<tr><th>");
-			document.text(header);
-			document.out.write("</th><td colspan=\"3\">");
-			document.text(value);
-			document.out.write("</td></tr>\n");
+			factory.tr__(tr -> tr
+				.th__(header)
+				.td().colspan(3).__(value)
+			);
 		}
 	}
 
-	private static void writeRow(String header, List<?> values, Document document) throws IOException {
+	private static void writeRow(String header, List<?> values, TR_factory<?> factory) throws IOException {
 		if(values != null) {
 			int size = values.size();
 			if(size > 0) {
-				document.out.write("<tr><th>");
-				document.text(header);
-				document.out.write("</th><td colspan=\"3\">");
-				for(int i=0; i<size; i++) {
-					document.text(values.get(i));
-					if(i != (size - 1)) {
-						document.br__();
-					}
-				}
-				document.out.write("</td></tr>\n");
+				factory.tr__(tr -> tr
+					.th__(header)
+					.td().colspan(3).__(td -> {
+						for(int i = 0; i < size; i++) {
+							if(i != 0) td.br__();
+							td.text(values.get(i));
+						}
+					})
+				);
 			}
 		}
 	}
 
-	private static void writeRow(String header, Calendar date, Document document) throws IOException {
-		if(date != null) writeRow(header, CalendarUtils.formatDate(date), document);
+	private static void writeRow(String header, Calendar date, TR_factory<?> factory) throws IOException {
+		if(date != null) writeRow(header, CalendarUtils.formatDate(date), factory);
 	}
 
-	private static void writeRow(String header, Recurring recurring, boolean relative, Document document) throws IOException {
+	private static void writeRow(String header, Recurring recurring, boolean relative, TR_factory<?> factory) throws IOException {
 		if(recurring != null) {
 			writeRow(
 				header,
 				relative
 					? (recurring.getRecurringDisplay() + " (Relative)")
 					: recurring.getRecurringDisplay(),
-				document
+				factory
 			);
 		}
 	}
 
-	public static void writeBeforeBody(
+	/**
+	 * @return  When captureLevel == BODY, the tbody, which may be used to write additional content and must be passed onto
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.TBODY_c, com.semanticcms.core.model.ElementContext)}.
+	 *          For all other capture levels returns {@code null}.
+	 */
+	public static <__ extends PalpableContent<__>> TBODY_c<TABLE_c<__>> writeBeforeBody(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		Document document,
+		__ palpable,
 		Task task,
 		Object style
 	) throws TaskException, IOException, ServletException {
@@ -189,102 +190,101 @@ final public class TaskHtmlRenderer {
 			}
 			// Write the task itself to this page
 			final PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-			document.out.write("<table id=\"");
-			PageIndex.appendIdInPage(
-				pageIndex,
-				currentPage,
-				task.getId(),
-				new MediaWriter(document.encodingContext, TextInXhtmlAttributeEncoder.textInXhtmlAttributeEncoder, document.out)
-			);
-			document.out.write("\" class=\"ao-grid pragmatickm-task\"");
-			style = Coercion.nullIfEmpty(style); // TODO: trimNullIfEmpty, here and all (class, too, remove more)
-			if(style != null) {
-				document.out.write(" style=\"");
-				Coercion.write(style, textInXhtmlAttributeEncoder, document.out);
-				document.out.write('"');
-			}
-			document.out.write(">\n"
-					+ "<thead><tr><th colspan=\"4\"><div>");
-			document.text(task.getLabel());
-			document.out.write("</div></th></tr></thead>\n"
-					+ "<tbody>\n");
-			final long now = System.currentTimeMillis();
-			writeTasks(servletContext, request, response, document, cache, currentPage, now, doBefores, statuses, "Do Before:");
-			document.out.write("<tr><th>Status:</th><td class=\"");
-			StatusResult status = statuses.get(task);
-			encodeTextInXhtmlAttribute(status.getStyle().getCssClass(), document.out);
-			document.out.write("\" colspan=\"3\">");
-			document.text(status.getDescription());
-			document.out.write("</td></tr>\n");
-			String comments = status.getComments();
-			if(comments != null && !comments.isEmpty()) {
-				document.out.write("<tr><th>Status Comment:</th><td colspan=\"3\">");
-				document.text(comments);
-				document.out.write("</td></tr>\n");
-			}
-			// TODO: When there are no current status comments, show any tasklog comments from the last entry
-			List<TaskPriority> taskPriorities = task.getPriorities();
-			for(int i=0, size=taskPriorities.size(); i<size; i++) {
-				TaskPriority taskPriority = taskPriorities.get(i);
-				document.out.write("<tr>");
-				if(i==0) {
-					document.out.write("<th");
-					if(size != 1) {
-						document.out.write(" rowspan=\"");
-						encodeTextInXhtmlAttribute(Integer.toString(size), document.out);
-						document.out.write('"');
+			TBODY_c<TABLE_c<__>> tbody = palpable.table()
+				.id(idAttr -> PageIndex.appendIdInPage(
+					pageIndex,
+					currentPage,
+					task.getId(),
+					idAttr
+				))
+				.clazz("ao-grid", "pragmatickm-task")
+				.style(style)
+			._c()
+				.thead__(thead -> thead
+					.tr__(tr -> tr
+						.th().colspan(4).__(th -> th
+							.div__(task)
+						)
+					)
+				)
+				.tbody_c();
+					final long now = System.currentTimeMillis();
+					writeTasks(servletContext, request, response, tbody, cache, currentPage, now, doBefores, statuses, "Do Before:");
+					StatusResult status = statuses.get(task);
+					tbody.tr__(tr -> tr
+						.th__("Status:")
+						.td().clazz(status.getStyle().getCssClass()).colspan(3).__(status.getDescription())
+					);
+					String comments = status.getComments();
+					if(comments != null && !comments.isEmpty()) {
+						tbody.tr__(tr -> tr
+							.th__("Status Comment:")
+							.td().colspan(3).__(comments)
+						);
 					}
-					document.out.write(">Priority:</th>");
-				}
-				document.out.write("<td class=\"");
-				Priority priority = taskPriority.getPriority();
-				encodeTextInXhtmlAttribute(priority.getCssClass(), document.out);
-				document.out.write("\" colspan=\"3\">");
-				document.text(taskPriority);
-				document.out.write("</td></tr>\n");
-			}
-			writeRow(recurring==null ? "On:" : "Starting:", task.getOn(), document);
-			writeRow("Recurring:", recurring, relative, document);
-			writeRow("Assigned To:", task.getAssignedTo(), document);
-			writeRow("Pay:", task.getPay(), document);
-			writeRow("Cost:", task.getCost(), document);
-			writeTasks(servletContext, request, response, document, cache, currentPage, now, doAfters, statuses, "Do After:");
+					// TODO: When there are no current status comments, show any tasklog comments from the last entry
+					List<TaskPriority> taskPriorities = task.getPriorities();
+					for(int i_ = 0, size = taskPriorities.size(); i_ < size; i_++) {
+						int i = i_;
+						TaskPriority taskPriority = taskPriorities.get(i);
+						tbody.tr__(tr -> {
+							if(i == 0) {
+								tr.th().rowspan(size).__("Priority");
+							}
+							tr.td().clazz(taskPriority.getPriority().getCssClass()).colspan(3).__(taskPriority);
+						});
+					}
+					writeRow(recurring == null ? "On:" : "Starting:", task.getOn(), tbody);
+					writeRow("Recurring:", recurring, relative, tbody);
+					writeRow("Assigned To:", task.getAssignedTo(), tbody);
+					writeRow("Pay:", task.getPay(), tbody);
+					writeRow("Cost:", task.getCost(), tbody);
+					writeTasks(servletContext, request, response, tbody, cache, currentPage, now, doAfters, statuses, "Do After:");
+			return tbody;
+		} else {
+			return null;
 		}
 	}
 
 	/**
 	 * @param style  ValueExpression that returns Object, only evaluated for BODY capture level
+	 *
+	 * @return  The tbody, which may be used to write additional content and must be passed onto
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.TBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 */
-	public static void writeBeforeBody(
+	public static <__ extends PalpableContent<__>> TBODY_c<TABLE_c<__>> writeBeforeBody(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		Document document,
+		__ palpable,
 		Task task,
 		ValueExpression style
 	) throws TaskException, IOException, ServletException {
-		writeBeforeBody(
+		return writeBeforeBody(
 			servletContext,
 			request,
 			response,
 			captureLevel,
-			document,
+			palpable,
 			task,
 			captureLevel == CaptureLevel.BODY ? resolveValue(style, Object.class, elContext) : null
 		);
 	}
 
-	public static void writeAfterBody(Task task, Document document, ElementContext context) throws IOException {
-		BufferResult body = task.getBody();
-		if(body.getLength() > 0) {
-			document.out.write("<tr><td colspan=\"4\">\n");
-			body.writeTo(new NodeBodyWriter(task, document.out, context));
-			document.out.write("\n</td></tr>\n");
-		}
-		document.out.write("</tbody>\n"
-				+ "</table>");
+	public static <__ extends PalpableContent<__>> void writeAfterBody(Task task, TBODY_c<TABLE_c<__>> tbody, ElementContext context) throws IOException {
+				BufferResult body = task.getBody();
+				if(body.getLength() > 0) {
+					tbody.tr__(tr -> tr
+						.td().colspan(4).__(td ->
+							body.writeTo(new NodeBodyWriter(task, td.getDocument().out, context))
+						)
+					);
+				}
+				tbody
+			.__()
+		.__();
 	}
 
 	/**
@@ -316,8 +316,8 @@ final public class TaskHtmlRenderer {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Document document,
-		Cache cache,
+		TR_factory<?> factory,
+		Cache cache, // TODO: Unused
 		Page currentPage,
 		long now,
 		List<? extends Task> tasks,
@@ -325,78 +325,59 @@ final public class TaskHtmlRenderer {
 		String label
 	) throws ServletException, IOException, TaskException {
 		int size = tasks.size();
-		if(size>0) {
+		if(size > 0) {
 			HtmlRenderer htmlRenderer = HtmlRenderer.getInstance(servletContext);
-			for(int i=0; i<size; i++) {
+			for(int i_ = 0; i_ < size; i_++) {
+				int i = i_;
 				Task task = tasks.get(i);
 				final Page taskPage = task.getPage();
 				StatusResult status = statuses.get(task);
 				Priority priority = getPriorityForStatus(now, task, status);
-				document.out.write("<tr>");
-				if(i==0) {
-					document.out.write("<th rowspan=\"");
-					encodeTextInXhtmlAttribute(Integer.toString(size), document.out);
-					document.out.write("\">");
-					document.text(label);
-					document.out.write("</th>");
-				}
-				document.out.write("<td class=\"");
-				encodeTextInXhtmlAttribute(status.getStyle().getCssClass(), document.out);
-				document.out.write("\">");
-				document.text(status.getDescription());
-				document.out.write("</td><td class=\"");
-				encodeTextInXhtmlAttribute(priority.getCssClass(), document.out);
-				document.out.write("\">");
-				document.text(priority);
-				document.out.write("</td><td><a");
-				String linkCssClass = htmlRenderer.getLinkCssClass(task);
-				if(linkCssClass != null) {
-					document.out.write(" class=\"");
-					encodeTextInXhtmlAttribute(linkCssClass, document.out);
-					document.out.write('"');
-				}
-				PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-				final PageRef taskPageRef = taskPage.getPageRef();
-				Integer index = pageIndex==null ? null : pageIndex.getPageIndex(taskPageRef);
-				document.out.write(" href=\"");
-				StringBuilder href = new StringBuilder();
-				if(index != null) {
-					// view=all mode
-					href.append('#');
-					URIEncoder.encodeURIComponent(
-						PageIndex.getRefId(
-							index,
-							task.getId()
-						),
-						href
-					);
-				} else if(taskPage.equals(currentPage)) {
-					// Task on this page, generate anchor-only link
-					href.append('#');
-					URIEncoder.encodeURIComponent(task.getId(), href);
-				} else {
-					// Task on other page, generate full link
-					BookRef taskBookRef = taskPageRef.getBookRef();
-					URIEncoder.encodeURI(request.getContextPath(), href);
-					URIEncoder.encodeURI(taskBookRef.getPrefix(), href);
-					URIEncoder.encodeURI(taskPageRef.getPath().toString(), href);
-					href.append('#');
-					URIEncoder.encodeURIComponent(task.getId(), href);
-				}
-				encodeTextInXhtmlAttribute(
-					response.encodeURL(
-						href.toString()
-					),
-					document.out
-				);
-				document.out.write("\">");
-				document.text(task.getLabel());
-				if(index != null) {
-					document.out.write("<sup>[");
-					document.text(index + 1);
-					document.out.write("]</sup>");
-				}
-				document.out.write("</a></td></tr>\n");
+				factory.tr__(tr -> {
+					if(i == 0) {
+						tr.th().rowspan(size).__(label);
+					}
+					tr.td().clazz(status.getStyle().getCssClass()).__(status.getDescription())
+					.td().clazz(priority.getCssClass()).__(priority)
+					.td__(td -> {
+						PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
+						final PageRef taskPageRef = taskPage.getPageRef();
+						Integer index = pageIndex==null ? null : pageIndex.getPageIndex(taskPageRef);
+						StringBuilder href = new StringBuilder();
+						if(index != null) {
+							// view=all mode
+							href.append('#');
+							URIEncoder.encodeURIComponent(
+								PageIndex.getRefId(
+									index,
+									task.getId()
+								),
+								href
+							);
+						} else if(taskPage.equals(currentPage)) {
+							// Task on this page, generate anchor-only link
+							href.append('#');
+							URIEncoder.encodeURIComponent(task.getId(), href);
+						} else {
+							// Task on other page, generate full link
+							BookRef taskBookRef = taskPageRef.getBookRef();
+							URIEncoder.encodeURI(request.getContextPath(), href);
+							URIEncoder.encodeURI(taskBookRef.getPrefix(), href);
+							URIEncoder.encodeURI(taskPageRef.getPath().toString(), href);
+							href.append('#');
+							URIEncoder.encodeURIComponent(task.getId(), href);
+						}
+						td.a()
+							.clazz(htmlRenderer.getLinkCssClass(task))
+							.href(response.encodeURL(href.toString()))
+						.__(a -> {
+							a.text(task);
+							if(index != null) {
+								a.sup__(sup -> sup.text('[').text(Integer.toString(index+1)).text(']'));
+							}
+						});
+					});
+				});
 			}
 		}
 	}
