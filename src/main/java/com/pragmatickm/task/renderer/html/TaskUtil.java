@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -166,7 +166,7 @@ final public class TaskUtil {
 	private static final String GET_STATUS_CACHE_KEY = TaskUtil.class.getName() + ".getStatus";
 
 	@SuppressWarnings("unchecked")
-	private static Map<Task,StatusResult> getStatusCache(Cache cache) {
+	private static Map<Task, StatusResult> getStatusCache(Cache cache) {
 		return cache.getAttribute(
 			GET_STATUS_CACHE_KEY,
 			Map.class,
@@ -247,7 +247,7 @@ final public class TaskUtil {
 		HttpServletResponse response,
 		Task task,
 		Cache cache,
-		Map<Task,StatusResult> statusCache
+		Map<Task, StatusResult> statusCache
 	) throws TaskException, ServletException, IOException {
 		StatusResult sr = statusCache.get(task);
 		if(sr == null) {
@@ -264,7 +264,7 @@ final public class TaskUtil {
 		HttpServletResponse response,
 		Task task,
 		Cache cache,
-		Map<Task,StatusResult> statusCache
+		Map<Task, StatusResult> statusCache
 	) throws TaskException, ServletException, IOException {
 		UnmodifiableCalendar on = task.getOn();
 		Recurring recurring = task.getRecurring();
@@ -594,7 +594,7 @@ final public class TaskUtil {
 		}
 	}
 
-	public static Map<Task,StatusResult> getMultipleStatuses(
+	public static Map<Task, StatusResult> getMultipleStatuses(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -609,7 +609,7 @@ final public class TaskUtil {
 		);
 	}
 
-	public static Map<Task,StatusResult> getMultipleStatuses(
+	public static Map<Task, StatusResult> getMultipleStatuses(
 		final ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -620,7 +620,7 @@ final public class TaskUtil {
 		if(size == 0) {
 			return Collections.emptyMap();
 		} else {
-			final Map<Task,StatusResult> statusCache = getStatusCache(cache);
+			final Map<Task, StatusResult> statusCache = getStatusCache(cache);
 			if(size == 1) {
 				Task task = tasks.iterator().next();
 				return Collections.singletonMap(
@@ -635,7 +635,7 @@ final public class TaskUtil {
 					)
 				);
 			} else {
-				Map<Task,StatusResult> results = AoCollections.newLinkedHashMap(size);
+				Map<Task, StatusResult> results = AoCollections.newLinkedHashMap(size);
 				List<Task> notCached = null; // Created when first needed
 				for(Task task : tasks) {
 					StatusResult cached = statusCache.get(task);
@@ -775,7 +775,7 @@ final public class TaskUtil {
 	 * @return  The map of doAfters, in the same iteration order as the provided
 	 *          tasks.  If no doAfters for a given task, will contain an empty list.
 	 */
-	public static Map<Task,List<Task>> getMultipleDoAfters(
+	public static Map<Task, List<Task>> getMultipleDoAfters(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -792,9 +792,9 @@ final public class TaskUtil {
 			);
 		} else {
 			// Fill with empty lists, this sets the iteration order, too
-			final Map<Task,List<Task>> results = AoCollections.newLinkedHashMap(size);
+			final Map<Task, List<Task>> results = AoCollections.newLinkedHashMap(size);
 			// Build map from ElementRef back to Task, for fast lookup during traversal
-			final Map<ElementRef,Task> tasksByElementRef = AoCollections.newHashMap(size);
+			final Map<ElementRef, Task> tasksByElementRef = AoCollections.newHashMap(size);
 			{
 				List<Task> emptyList = Collections.emptyList();
 				for(Task task : tasks) {
@@ -849,7 +849,7 @@ final public class TaskUtil {
 				null
 			);
 			// Wrap any with size of 2 or more with unmodifiable, 0 and 1 already are unmodifiable
-			for(Map.Entry<Task,List<Task>> entry : results.entrySet()) {
+			for(Map.Entry<Task, List<Task>> entry : results.entrySet()) {
 				List<Task> doAfters = entry.getValue();
 				if(doAfters.size() > 1) entry.setValue(Collections.unmodifiableList(doAfters));
 			}
@@ -883,12 +883,12 @@ final public class TaskUtil {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		Cache cache,
-		Map<Task,StatusResult> statusCache,
+		Map<Task, StatusResult> statusCache,
 		long now,
 		Task task,
 		StatusResult status,
-		Map<Task,List<Task>> doAftersByTask,
-		Map<Task,Priority> effectivePriorities
+		Map<Task, List<Task>> doAftersByTask,
+		Map<Task, Priority> effectivePriorities
 	) throws TaskException, ServletException, IOException {
 		Priority cached = effectivePriorities.get(task);
 		if(cached != null) return cached;
@@ -945,7 +945,7 @@ final public class TaskUtil {
 	) throws TaskException, ServletException, IOException {
 		final long now = System.currentTimeMillis();
 		final Cache cache = CacheFilter.getCache(request);
-		final Map<Task,StatusResult> statusCache = getStatusCache(cache);
+		final Map<Task, StatusResult> statusCache = getStatusCache(cache);
 		// Priority inheritance
 		List<Task> allTasks = getAllTasks(
 			servletContext,
@@ -961,14 +961,14 @@ final public class TaskUtil {
 			null
 		);
 		// Index tasks by page,id
-		Map<ElementRef,Task> tasksByKey = AoCollections.newHashMap(allTasks.size());
+		Map<ElementRef, Task> tasksByKey = AoCollections.newHashMap(allTasks.size());
 		for(Task task : allTasks) {
 			if(tasksByKey.put(task.getElementRef(), task) != null) {
 				throw new AssertionError("Duplicate task (page, id)");
 			}
 		}
 		// Invert dependency DAG for fast lookups for priority inheritance
-		final Map<Task,List<Task>> doAftersByTask = AoCollections.newLinkedHashMap(allTasks.size());
+		final Map<Task, List<Task>> doAftersByTask = AoCollections.newLinkedHashMap(allTasks.size());
 		for(Task task : allTasks) {
 			for(ElementRef doBeforeRef : task.getDoBefores()) {
 				Task doBefore = tasksByKey.get(doBeforeRef);
@@ -983,7 +983,7 @@ final public class TaskUtil {
 			}
 		}
 		// Caches the effective priorities for tasks being prioritized or any other resolved in processing
-		final Map<Task,Priority> effectivePriorities = new HashMap<>();
+		final Map<Task, Priority> effectivePriorities = new HashMap<>();
 		// Build new list and sort
 		List<Task> sortedTasks = new ArrayList<>(tasks);
 		Collections.sort(
@@ -1057,12 +1057,12 @@ final public class TaskUtil {
 		return Collections.unmodifiableList(sortedTasks);
 	}
 
-	private static <V> Map<PageUserKey,V> getPageUserCache(
+	private static <V> Map<PageUserKey, V> getPageUserCache(
 		final Cache cache,
 		String key
 	) {
 		@SuppressWarnings("unchecked")
-		Map<PageUserKey,V> pageUserCache = cache.getAttribute(
+		Map<PageUserKey, V> pageUserCache = cache.getAttribute(
 			key,
 			Map.class,
 			() -> cache.newMap()
@@ -1070,7 +1070,7 @@ final public class TaskUtil {
 		return pageUserCache;
 	}
 
-	static class PageUserKey extends Tuple2<Page,User> {
+	static class PageUserKey extends Tuple2<Page, User> {
 		PageUserKey(Page page, User user) {
 			super(page, user);
 		}
@@ -1086,7 +1086,7 @@ final public class TaskUtil {
 		final User user
 	) throws IOException, ServletException {
 		PageUserKey cacheKey = new PageUserKey(rootPage, user);
-		Map<PageUserKey,List<Task>> cache = getPageUserCache(CacheFilter.getCache(request), ALL_TASKS_CACHE_KEY);
+		Map<PageUserKey, List<Task>> cache = getPageUserCache(CacheFilter.getCache(request), ALL_TASKS_CACHE_KEY);
 		List<Task> results = cache.get(cacheKey);
 		if(results == null) {
 			final List<Task> allTasks = new ArrayList<>();
@@ -1131,8 +1131,8 @@ final public class TaskUtil {
 	) throws ServletException, IOException {
 		PageUserKey cacheKey = new PageUserKey(page, user);
 		final Cache cache = CacheFilter.getCache(request);
-		final Map<Task,StatusResult> statusCache = getStatusCache(cache);
-		Map<PageUserKey,Boolean> hasAssignedTaskCache = getPageUserCache(cache, HAS_ASSIGNED_TASK_CACHE_KEY);
+		final Map<Task, StatusResult> statusCache = getStatusCache(cache);
+		Map<PageUserKey, Boolean> hasAssignedTaskCache = getPageUserCache(cache, HAS_ASSIGNED_TASK_CACHE_KEY);
 		Boolean result = hasAssignedTaskCache.get(cacheKey);
 		if(result == null) {
 			final long now = System.currentTimeMillis();
@@ -1258,8 +1258,8 @@ final public class TaskUtil {
 	) throws IOException, ServletException {
 		PageUserKey cacheKey = new PageUserKey(rootPage, user);
 		final Cache cache = CacheFilter.getCache(request);
-		final Map<Task,StatusResult> statusCache = getStatusCache(cache);
-		Map<PageUserKey,List<Task>> getReadyTasksCache = getPageUserCache(cache, GET_READY_TASKS_CACHE_KEY);
+		final Map<Task, StatusResult> statusCache = getStatusCache(cache);
+		Map<PageUserKey, List<Task>> getReadyTasksCache = getPageUserCache(cache, GET_READY_TASKS_CACHE_KEY);
 		List<Task> results = getReadyTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
@@ -1342,8 +1342,8 @@ final public class TaskUtil {
 	) throws IOException, ServletException {
 		PageUserKey cacheKey = new PageUserKey(rootPage, user);
 		final Cache cache = CacheFilter.getCache(request);
-		final Map<Task,StatusResult> statusCache = getStatusCache(cache);
-		Map<PageUserKey,List<Task>> getBlockedTasksCache = getPageUserCache(cache, GET_BLOCKED_TASKS_CACHE_KEY);
+		final Map<Task, StatusResult> statusCache = getStatusCache(cache);
+		Map<PageUserKey, List<Task>> getBlockedTasksCache = getPageUserCache(cache, GET_BLOCKED_TASKS_CACHE_KEY);
 		List<Task> results = getBlockedTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
@@ -1427,8 +1427,8 @@ final public class TaskUtil {
 	) throws IOException, ServletException {
 		PageUserKey cacheKey = new PageUserKey(rootPage, user);
 		final Cache cache = CacheFilter.getCache(request);
-		final Map<Task,StatusResult> statusCache = getStatusCache(cache);
-		Map<PageUserKey,List<Task>> futureTasksCache = getPageUserCache(cache, FUTURE_TASKS_CACHE_KEY);
+		final Map<Task, StatusResult> statusCache = getStatusCache(cache);
+		Map<PageUserKey, List<Task>> futureTasksCache = getPageUserCache(cache, FUTURE_TASKS_CACHE_KEY);
 		List<Task> results = futureTasksCache.get(cacheKey);
 		if(results == null) {
 			final long now = System.currentTimeMillis();
