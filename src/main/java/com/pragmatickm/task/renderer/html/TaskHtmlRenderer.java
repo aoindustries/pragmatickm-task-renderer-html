@@ -28,7 +28,7 @@ import com.aoindustries.html.AnyDocument;
 import com.aoindustries.html.PalpableContent;
 import com.aoindustries.html.TABLE_c;
 import com.aoindustries.html.TBODY_c;
-import com.aoindustries.html.TR_factory;
+import com.aoindustries.html.Union_TBODY_THEAD_TFOOT;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.net.URIEncoder;
@@ -75,20 +75,20 @@ final public class TaskHtmlRenderer {
 	private static final String TASKLOG_MID = "-tasklog-";
 	private static final String TASKLOG_EXTENSION = ".xml";
 
-	private static void writeRow(String header, String value, TR_factory<?, ?> factory) throws IOException {
+	private static void writeRow(String header, String value, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(value != null) {
-			factory.tr__(tr -> tr
+			content.tr__(tr -> tr
 				.th__(header)
 				.td().colspan(3).__(value)
 			);
 		}
 	}
 
-	private static void writeRow(String header, List<?> values, TR_factory<?, ?> factory) throws IOException {
+	private static void writeRow(String header, List<?> values, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(values != null) {
 			int size = values.size();
 			if(size > 0) {
-				factory.tr__(tr -> tr
+				content.tr__(tr -> tr
 					.th__(header)
 					.td().colspan(3).__(td -> {
 						for(int i = 0; i < size; i++) {
@@ -101,18 +101,18 @@ final public class TaskHtmlRenderer {
 		}
 	}
 
-	private static void writeRow(String header, Calendar date, TR_factory<?, ?> factory) throws IOException {
-		if(date != null) writeRow(header, CalendarUtils.formatDate(date), factory);
+	private static void writeRow(String header, Calendar date, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
+		if(date != null) writeRow(header, CalendarUtils.formatDate(date), content);
 	}
 
-	private static void writeRow(String header, Recurring recurring, boolean relative, TR_factory<?, ?> factory) throws IOException {
+	private static void writeRow(String header, Recurring recurring, boolean relative, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(recurring != null) {
 			writeRow(
 				header,
 				relative
 					? (recurring.getRecurringDisplay() + " (Relative)")
 					: recurring.getRecurringDisplay(),
-				factory
+				content
 			);
 		}
 	}
@@ -288,7 +288,7 @@ final public class TaskHtmlRenderer {
 				if(body.getLength() > 0) {
 					tbody.tr__(tr -> tr
 						.td().colspan(4).__(td ->
-							body.writeTo(new NodeBodyWriter(task, td.getDocument().out, context))
+							body.writeTo(new NodeBodyWriter(task, td.getDocument().getUnsafe(), context))
 						)
 					);
 				}
@@ -326,7 +326,7 @@ final public class TaskHtmlRenderer {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		TR_factory<?, ?> factory,
+		Union_TBODY_THEAD_TFOOT<?, ?> content,
 		Cache cache, // TODO: Unused
 		Page currentPage,
 		long now,
@@ -343,7 +343,7 @@ final public class TaskHtmlRenderer {
 				final Page taskPage = task.getPage();
 				StatusResult status = statuses.get(task);
 				Priority priority = getPriorityForStatus(now, task, status);
-				factory.tr__(tr -> {
+				content.tr__(tr -> {
 					if(i == 0) {
 						tr.th().rowspan(size).__(label);
 					}
