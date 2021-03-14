@@ -24,11 +24,11 @@ package com.pragmatickm.task.renderer.html;
 
 import com.aoindustries.collections.AoCollections;
 import com.aoindustries.exception.WrappedException;
-import com.aoindustries.html.AnyDocument;
-import com.aoindustries.html.PalpableContent;
-import com.aoindustries.html.TABLE_c;
-import com.aoindustries.html.TBODY_c;
-import com.aoindustries.html.Union_TBODY_THEAD_TFOOT;
+import com.aoindustries.html.any.AnyDocument;
+import com.aoindustries.html.any.AnyPalpableContent;
+import com.aoindustries.html.any.AnyTABLE_c;
+import com.aoindustries.html.any.AnyTBODY_c;
+import com.aoindustries.html.any.AnyUnion_TBODY_THEAD_TFOOT;
 import com.aoindustries.io.buffer.BufferResult;
 import com.aoindustries.net.Path;
 import com.aoindustries.net.URIEncoder;
@@ -75,20 +75,20 @@ final public class TaskHtmlRenderer {
 	private static final String TASKLOG_MID = "-tasklog-";
 	private static final String TASKLOG_EXTENSION = ".xml";
 
-	private static void writeRow(String header, String value, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
+	private static void writeRow(String header, String value, AnyUnion_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(value != null) {
-			content.tr__(tr -> tr
+			content.tr__any(tr -> tr
 				.th__(header)
 				.td().colspan(3).__(value)
 			);
 		}
 	}
 
-	private static void writeRow(String header, List<?> values, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
+	private static void writeRow(String header, List<?> values, AnyUnion_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(values != null) {
 			int size = values.size();
 			if(size > 0) {
-				content.tr__(tr -> tr
+				content.tr__any(tr -> tr
 					.th__(header)
 					.td().colspan(3).__(td -> {
 						for(int i = 0; i < size; i++) {
@@ -101,11 +101,11 @@ final public class TaskHtmlRenderer {
 		}
 	}
 
-	private static void writeRow(String header, Calendar date, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
+	private static void writeRow(String header, Calendar date, AnyUnion_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(date != null) writeRow(header, CalendarUtils.formatDate(date), content);
 	}
 
-	private static void writeRow(String header, Recurring recurring, boolean relative, Union_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
+	private static void writeRow(String header, Recurring recurring, boolean relative, AnyUnion_TBODY_THEAD_TFOOT<?, ?> content) throws IOException {
 		if(recurring != null) {
 			writeRow(
 				header,
@@ -119,13 +119,13 @@ final public class TaskHtmlRenderer {
 
 	/**
 	 * @return  When captureLevel == BODY, the tbody, which may be used to write additional content and must be passed onto
-	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.TBODY_c, com.semanticcms.core.model.ElementContext)}.
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 *          For all other capture levels returns {@code null}.
 	 */
 	public static <
 		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
-	> TBODY_c<D, TABLE_c<D, __>> writeBeforeBody(
+		__ extends AnyPalpableContent<D, __>
+	> AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> writeBeforeBody(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
@@ -194,7 +194,7 @@ final public class TaskHtmlRenderer {
 			}
 			// Write the task itself to this page
 			final PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-			TBODY_c<D, TABLE_c<D, __>> tbody = palpable.table()
+			AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> tbody = palpable.table()
 				.id(idAttr -> PageIndex.appendIdInPage(
 					pageIndex,
 					currentPage,
@@ -204,8 +204,8 @@ final public class TaskHtmlRenderer {
 				.clazz("ao-grid", "pragmatickm-task")
 				.style(style)
 			._c()
-				.thead__(thead -> thead
-					.tr__(tr -> tr
+				.thead__any(thead -> thead
+					.tr__any(tr -> tr
 						.th().colspan(4).__(th -> th
 							.div__(task)
 						)
@@ -215,13 +215,13 @@ final public class TaskHtmlRenderer {
 					final long now = System.currentTimeMillis();
 					writeTasks(servletContext, request, response, tbody, cache, currentPage, now, doBefores, statuses, "Do Before:");
 					StatusResult status = statuses.get(task);
-					tbody.tr__(tr -> tr
+					tbody.tr__any(tr -> tr
 						.th__("Status:")
 						.td().clazz(status.getStyle().getCssClass()).colspan(3).__(status.getDescription())
 					);
 					String comments = status.getComments();
 					if(comments != null && !comments.isEmpty()) {
-						tbody.tr__(tr -> tr
+						tbody.tr__any(tr -> tr
 							.th__("Status Comment:")
 							.td().colspan(3).__(comments)
 						);
@@ -231,7 +231,7 @@ final public class TaskHtmlRenderer {
 					for(int i_ = 0, size = taskPriorities.size(); i_ < size; i_++) {
 						int i = i_;
 						TaskPriority taskPriority = taskPriorities.get(i);
-						tbody.tr__(tr -> {
+						tbody.tr__any(tr -> {
 							if(i == 0) {
 								tr.th().rowspan(size).__("Priority");
 							}
@@ -254,12 +254,12 @@ final public class TaskHtmlRenderer {
 	 * @param style  ValueExpression that returns Object, only evaluated for BODY capture level
 	 *
 	 * @return  The tbody, which may be used to write additional content and must be passed onto
-	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.TBODY_c, com.semanticcms.core.model.ElementContext)}.
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 */
 	public static <
 		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
-	> TBODY_c<D, TABLE_c<D, __>> writeBeforeBody(
+		__ extends AnyPalpableContent<D, __>
+	> AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> writeBeforeBody(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
@@ -280,13 +280,10 @@ final public class TaskHtmlRenderer {
 		);
 	}
 
-	public static <
-		D extends AnyDocument<D>,
-		__ extends PalpableContent<D, __>
-	> void writeAfterBody(Task task, TBODY_c<D, TABLE_c<D, __>> tbody, ElementContext context) throws IOException {
+	public static void writeAfterBody(Task task, AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> tbody, ElementContext context) throws IOException {
 				BufferResult body = task.getBody();
 				if(body.getLength() > 0) {
-					tbody.tr__(tr -> tr
+					tbody.tr__any(tr -> tr
 						.td().colspan(4).__(td ->
 							body.writeTo(new NodeBodyWriter(task, td.getDocument().getUnsafe(), context))
 						)
@@ -326,7 +323,7 @@ final public class TaskHtmlRenderer {
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
-		Union_TBODY_THEAD_TFOOT<?, ?> content,
+		AnyUnion_TBODY_THEAD_TFOOT<?, ?> content,
 		Cache cache, // TODO: Unused
 		Page currentPage,
 		long now,
@@ -343,13 +340,13 @@ final public class TaskHtmlRenderer {
 				final Page taskPage = task.getPage();
 				StatusResult status = statuses.get(task);
 				Priority priority = getPriorityForStatus(now, task, status);
-				content.tr__(tr -> {
+				content.tr__any(tr -> {
 					if(i == 0) {
 						tr.th().rowspan(size).__(label);
 					}
 					tr.td().clazz(status.getStyle().getCssClass()).__(status.getDescription())
 					.td().clazz(priority.getCssClass()).__(priority)
-					.td__(td -> {
+					.td__any(td -> {
 						PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
 						final PageRef taskPageRef = taskPage.getPageRef();
 						Integer index = pageIndex==null ? null : pageIndex.getPageIndex(taskPageRef);
@@ -383,7 +380,7 @@ final public class TaskHtmlRenderer {
 						.__(a -> {
 							a.text(task);
 							if(index != null) {
-								a.sup__(sup -> sup.text('[').text(Integer.toString(index+1)).text(']'));
+								a.sup__any(sup -> sup.text('[').text(Integer.toString(index+1)).text(']'));
 							}
 						});
 					});
