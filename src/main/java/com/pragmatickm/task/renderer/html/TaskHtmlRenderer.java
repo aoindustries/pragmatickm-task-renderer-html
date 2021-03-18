@@ -24,7 +24,6 @@ package com.pragmatickm.task.renderer.html;
 
 import com.aoindustries.collections.AoCollections;
 import com.aoindustries.exception.WrappedException;
-import com.aoindustries.html.any.AnyDocument;
 import com.aoindustries.html.any.AnyPalpableContent;
 import com.aoindustries.html.any.AnyTABLE_c;
 import com.aoindustries.html.any.AnyTBODY_c;
@@ -122,15 +121,12 @@ final public class TaskHtmlRenderer {
 	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 *          For all other capture levels returns {@code null}.
 	 */
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> writeBeforeBody(
+	public static AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> writeBeforeBody(
 		ServletContext servletContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		__ palpable,
+		AnyPalpableContent<?, ?> palpable,
 		Task task,
 		Object style
 	) throws TaskException, IOException, ServletException {
@@ -194,7 +190,7 @@ final public class TaskHtmlRenderer {
 			}
 			// Write the task itself to this page
 			final PageIndex pageIndex = PageIndex.getCurrentPageIndex(request);
-			AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> tbody = palpable.table()
+			AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> tbody = palpable.table()
 				.id(idAttr -> PageIndex.appendIdInPage(
 					pageIndex,
 					currentPage,
@@ -256,16 +252,13 @@ final public class TaskHtmlRenderer {
 	 * @return  The tbody, which may be used to write additional content and must be passed onto
 	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 */
-	public static <
-		D extends AnyDocument<D>,
-		__ extends AnyPalpableContent<D, __>
-	> AnyTBODY_c<D, ? extends AnyTABLE_c<D, __, ?>, ?> writeBeforeBody(
+	public static AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> writeBeforeBody(
 		ServletContext servletContext,
 		ELContext elContext,
 		HttpServletRequest request,
 		HttpServletResponse response,
 		CaptureLevel captureLevel,
-		__ palpable,
+		AnyPalpableContent<?, ?> palpable,
 		Task task,
 		ValueExpression style
 	) throws TaskException, IOException, ServletException {
