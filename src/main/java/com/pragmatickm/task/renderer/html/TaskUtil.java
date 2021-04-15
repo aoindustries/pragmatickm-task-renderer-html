@@ -258,6 +258,9 @@ final public class TaskUtil {
 		return sr;
 	}
 
+	// TODO: A way to push-up the schedule to the earliest date of something waiting for this task?
+	//       This would be similar for priority inheritence, but also affects the scheduled date considered for ordering.
+	// TODO: Support multiple schedules
 	private static StatusResult doGetStatus(
 		ServletContext servletContext,
 		HttpServletRequest request,
@@ -284,7 +287,7 @@ final public class TaskUtil {
 			String taskId = doBeforeRef.getId();
 			Element elem = capturedPage.getElementsById().get(taskId);
 			if(elem == null) throw new TaskException("doBefore not found: " + doBeforeRef);
-			if(!(elem instanceof Task)) throw new TaskException("doBefore is not a task: " + elem.getClass().getName());
+			if(!(elem instanceof Task)) throw new TaskException("doBefore \"" + taskId + "\" is not a task: " + elem.getClass().getName());
 			if(capturedPage.getGeneratedIds().contains(taskId)) throw new TaskException("Not allowed to reference task by generated id, set an explicit id on the task: " + elem);
 			Task doBefore = (Task)elem;
 			StatusResult doBeforeStatus = getStatus(
