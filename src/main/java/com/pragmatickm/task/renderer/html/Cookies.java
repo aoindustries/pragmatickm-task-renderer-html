@@ -1,6 +1,6 @@
 /*
  * pragmatickm-task-renderer-html - Tasks rendered as HTML in a Servlet environment.
- * Copyright (C) 2013, 2014, 2015, 2016, 2017  AO Industries, Inc.
+ * Copyright (C) 2013, 2014, 2015, 2016, 2017, 2021  AO Industries, Inc.
  *     support@aoindustries.com
  *     7262 Bull Pen Cir
  *     Mobile, AL 36695
@@ -22,9 +22,9 @@
  */
 package com.pragmatickm.task.renderer.html;
 
-import static com.aoindustries.servlet.http.Cookies.addCookie;
-import static com.aoindustries.servlet.http.Cookies.getCookie;
-import static com.aoindustries.servlet.http.Cookies.removeCookie;
+import static com.aoapps.servlet.http.Cookies.addCookie;
+import static com.aoapps.servlet.http.Cookies.getCookie;
+import static com.aoapps.servlet.http.Cookies.removeCookie;
 import com.pragmatickm.task.model.User;
 import com.semanticcms.core.renderer.html.Headers;
 import javax.servlet.http.HttpServletRequest;

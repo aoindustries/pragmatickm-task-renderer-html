@@ -22,19 +22,19 @@
  */
 package com.pragmatickm.task.renderer.html;
 
-import com.aoindustries.collections.AoCollections;
-import com.aoindustries.exception.WrappedException;
-import com.aoindustries.html.any.AnyPalpableContent;
-import com.aoindustries.html.any.AnyTABLE_c;
-import com.aoindustries.html.any.AnyTBODY_c;
-import com.aoindustries.html.any.AnyUnion_TBODY_THEAD_TFOOT;
-import com.aoindustries.io.buffer.BufferResult;
-import com.aoindustries.net.Path;
-import com.aoindustries.net.URIEncoder;
-import static com.aoindustries.taglib.AttributeUtils.resolveValue;
-import com.aoindustries.util.CalendarUtils;
-import com.aoindustries.util.schedule.Recurring;
-import com.aoindustries.validation.ValidationException;
+import com.aoapps.collections.AoCollections;
+import com.aoapps.hodgepodge.schedule.Recurring;
+import com.aoapps.html.any.AnyPalpableContent;
+import com.aoapps.html.any.AnyTABLE_c;
+import com.aoapps.html.any.AnyTBODY_c;
+import com.aoapps.html.any.AnyUnion_TBODY_THEAD_TFOOT;
+import com.aoapps.io.buffer.BufferResult;
+import com.aoapps.lang.exception.WrappedException;
+import com.aoapps.lang.util.CalendarUtils;
+import com.aoapps.lang.validation.ValidationException;
+import com.aoapps.net.Path;
+import com.aoapps.net.URIEncoder;
+import static com.aoapps.taglib.AttributeUtils.resolveValue;
 import com.pragmatickm.task.model.Priority;
 import com.pragmatickm.task.model.Task;
 import com.pragmatickm.task.model.TaskException;
@@ -118,7 +118,7 @@ final public class TaskHtmlRenderer {
 
 	/**
 	 * @return  When captureLevel == BODY, the tbody, which may be used to write additional content and must be passed onto
-	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoapps.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 *          For all other capture levels returns {@code null}.
 	 */
 	public static AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> writeBeforeBody(
@@ -250,7 +250,7 @@ final public class TaskHtmlRenderer {
 	 * @param style  ValueExpression that returns Object, only evaluated for BODY capture level
 	 *
 	 * @return  The tbody, which may be used to write additional content and must be passed onto
-	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoindustries.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
+	 *          {@link #writeAfterBody(com.pragmatickm.task.model.Task, com.aoapps.html.any.AnyTBODY_c, com.semanticcms.core.model.ElementContext)}.
 	 */
 	public static AnyTBODY_c<?, ? extends AnyTABLE_c<?, ?, ?>, ?> writeBeforeBody(
 		ServletContext servletContext,
